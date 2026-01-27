@@ -4,98 +4,351 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Application Form - Aloha Security</title>
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="application.css">
 </head>
 <body>
 
     <header>
         <div class="container nav-container">
-            <a href="index.html" class="btn btn-outline">Back to Home</a>
-            <h3>Application Form</h3>
-            <span>Step <span id="current-step-label">1</span> of 4</span>
+            <a href="index.html" class="btn btn-outline btn-back-home">
+                <i class="bi bi-arrow-left"></i> Back to Home
+            </a>
+            <div class="header-center">
+                <h3 class="brand-title">ALOHA SECURITY AGENCY</h3>
+                <p class="brand-slogan">YOUR SAFETY, OUR PRIORITY</p>
+            </div>
+            <div class="brand-step-counter">
+                Step <span id="current-step-label">1</span> of 4
+            </div>
         </div>
     </header>
 
+
     <div class="app-wrapper">
-        <!-- Visual Stepper -->
-        <div class="stepper">
-            <div class="step active" id="step-ind-1"><span class="step-num">1</span> Info</div>
-            <div class="step" id="step-ind-2"><span class="step-num">2</span> Position</div>
-            <div class="step" id="step-ind-3"><span class="step-num">3</span> Exp</div>
-            <div class="step" id="step-ind-4"><span class="step-num">4</span> Review</div>
+        <!-- Top Progress Strip -->
+        <div class="top-progress-strip">
+            <div class="top-progress-fill" id="top-progress-bar"></div>
         </div>
 
-        <form id="multi-step-form">
-            
-            <!-- STEP 1 -->
-            <div class="form-step active-step" id="step-1">
-                <h2>Personal Info</h2>
-                <div class="form-group"><label>First Name</label><input type="text" name="first_name" required></div>
-                <div class="form-group"><label>Last Name</label><input type="text" name="last_name" required></div>
-                <div class="form-group"><label>Email</label><input type="email" name="email" required></div>
-                <div class="form-group"><label>Mobile</label><input type="text" name="contact_num" required></div>
-                <div class="form-group"><label>Birthdate</label><input type="date" name="birthdate" required></div>
-                <div class="form-group">
-                    <label>Gender</label>
-                    <select name="gender"><option value="Male">Male</option><option value="Female">Female</option></select>
-                </div>
-                <div class="form-group"><label>Address</label><textarea name="address" rows="3" required></textarea></div>
-                
-                <div class="form-actions" style="justify-content: flex-end;">
-                    <!-- Data attribute used by main.js -->
-                    <button type="button" class="btn btn-primary btn-next" data-step="1">Next</button>
-                </div>
-            </div>
 
-            <!-- STEP 2 -->
-            <div class="form-step" id="step-2">
-                <h2>Position Details</h2>
-                <div class="form-group">
-                    <label>Position Applied For</label>
-                    <select name="position_applied">
-                        <option value="Security Guard">Security Guard</option>
-                        <option value="Head Guard">Head Guard</option>
-                        <option value="Lady Guard">Lady Guard</option>
-                        <option value="CCTV Operator">CCTV Operator</option>
-                    </select>
+                <!-- Visual Stepper -->
+                <div class="stepper">
+                    <div class="stepper-progress-bar"></div>
+                    <div class="step active" id="step-ind-1">
+                        <span class="step-num"><span>1</span><i class="bi bi-check-lg"></i></span> Info
+                    </div>
+                    <div class="step" id="step-ind-2">
+                        <span class="step-num"><span>2</span><i class="bi bi-check-lg"></i></span> Position
+                    </div>
+                    <div class="step" id="step-ind-3">
+                        <span class="step-num"><span>3</span><i class="bi bi-check-lg"></i></span> Exp
+                    </div>
+                    <div class="step" id="step-ind-4">
+                        <span class="step-num"><span>4</span><i class="bi bi-check-lg"></i></span> Review
+                    </div>
                 </div>
-                <div class="form-actions">
-                    <button type="button" class="btn btn-outline btn-prev" data-step="2">Previous</button>
-                    <button type="button" class="btn btn-primary btn-next" data-step="2">Next</button>
-                </div>
-            </div>
 
-            <!-- STEP 3 -->
-            <div class="form-step" id="step-3">
-                <h2>Experience & Documents</h2>
-                <div class="form-group"><label>Years of Experience</label><input type="number" name="years_experience" placeholder="0"></div>
-                <div class="form-group"><label>Previous Employer</label><input type="text" name="previous_employer"></div>
-                <div class="form-group"><label>Upload Resume</label><input type="file" name="resume" accept=".pdf, .jpg, .png" required></div>
-                <div class="form-group"><label>Upload Valid ID</label><input type="file" name="id_image" accept=".jpg, .png" required></div>
-                
-                <div class="form-actions">
-                    <button type="button" class="btn btn-outline btn-prev" data-step="3">Previous</button>
-                    <button type="button" class="btn btn-primary btn-next" data-step="3">Review</button>
-                </div>
-            </div>
+                <form id="multi-step-form">
+                    
+                    <!-- STEP 1 -->
+                    <div class="form-step active-step" id="step-1">
+                        <h2><i class="bi bi-person-lines-fill"></i> Personal Info</h2>
+                        
+                        <div class="form-row">
+                            <div class="floating-group">
+                                <input type="text" id="first_name" name="first_name" placeholder=" " required>
+                                <label for="first_name">First Name</label>
+                            </div>
+                            <div class="floating-group">
+                                <input type="text" id="last_name" name="last_name" placeholder=" " required>
+                                <label for="last_name">Last Name</label>
+                            </div>
+                        </div>
 
-            <!-- STEP 4 -->
-            <div class="form-step" id="step-4">
-                <h2>Review & Submit</h2>
-                <p>Please confirm your details.</p>
-                <div style="background: #eee; padding: 15px; margin: 20px 0;">
-                    <ul id="review-list" style="list-style: none;"></ul>
-                </div>
-                <div class="form-actions">
-                    <button type="button" class="btn btn-outline btn-prev" data-step="4">Previous</button>
-                    <button type="submit" class="btn btn-primary">Submit Application</button>
-                </div>
-            </div>
+                        <div class="form-row">
+                            <div class="floating-group">
+                                <input type="email" id="email" name="email" placeholder=" " required>
+                                <label for="email">Email Address</label>
+                            </div>
+                            <div class="floating-group">
+                                <input type="text" id="contact_num" name="contact_num" placeholder=" " required>
+                                <label for="contact_num">Mobile Number</label>
+                            </div>
+                        </div>
 
+                        <div class="form-row">
+                            <div class="floating-group">
+                                <input type="date" id="birthdate" name="birthdate" placeholder=" " required>
+                                <label for="birthdate">Birthdate</label>
+                            </div>
+                            <div class="floating-group">
+                                <select id="gender" name="gender" required>
+                                    <option value="" disabled selected>Select gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                </select>
+                                <label for="gender">Gender</label>
+                            </div>
+                        </div>
+
+                        <div class="floating-group">
+                            <textarea id="address" name="address" rows="3" placeholder=" " required></textarea>
+                            <label for="address">Full Home Address</label>
+                        </div>
+                        
+                        <div class="form-actions form-actions-end">
+                            <button type="button" class="btn btn-primary btn-next" data-step="1">Next Step <i class="bi bi-chevron-right"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 2 -->
+                    <div class="form-step" id="step-2">
+                        <h2><i class="bi bi-briefcase"></i> Position Details</h2>
+                        <div class="floating-group">
+                            <select id="position_applied" name="position_applied" required>
+                                <option value="Security Guard">Security Guard</option>
+                                <option value="Head Guard">Head Guard</option>
+                                <option value="Lady Guard">Lady Guard</option>
+                                <option value="CCTV Operator">CCTV Operator</option>
+                            </select>
+                            <label for="position_applied">Position Applied For</label>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-outline btn-prev" data-step="2"><i class="bi bi-chevron-left"></i> Previous</button>
+                            <button type="button" class="btn btn-primary btn-next" data-step="2">Next Step <i class="bi bi-chevron-right"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 3 -->
+                    <div class="form-step" id="step-3">
+                        <h2><i class="bi bi-file-earmark-arrow-up"></i> Experience & Documents</h2>
+                        
+                        <div class="form-row">
+                            <div class="floating-group">
+                                <input type="number" id="years_experience" name="years_experience" placeholder=" ">
+                                <label for="years_experience">Years of Experience</label>
+                            </div>
+                            <div class="floating-group">
+                                <input type="text" id="previous_employer" name="previous_employer" placeholder=" ">
+                                <label for="previous_employer">Previous Employer</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="upload-card-label">Attach Resume (PDF, JPG, or PNG)</label>
+                            <div class="upload-card">
+                                <i class="bi bi-cloud-arrow-up"></i>
+                                <span id="resume-label">Click to upload or drag & drop</span>
+                                <div class="upload-hint">Official documents only</div>
+                                <input type="file" id="resume" name="resume" accept=".pdf, .jpg, .png" aria-label="Upload Resume" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="upload-card-label">Valid ID (Government Issued)</label>
+                            <div class="upload-card">
+                                <i class="bi bi-person-badge"></i>
+                                <span id="id-label">Click to upload or drag & drop</span>
+                                <div class="upload-hint">Sharp, clear image required</div>
+                                <input type="file" id="id_image" name="id_image" accept=".jpg, .png" aria-label="Upload ID" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-outline btn-prev" data-step="3"><i class="bi bi-chevron-left"></i> Previous</button>
+                            <button type="button" class="btn btn-primary btn-next" data-step="3">Review Application <i class="bi bi-eye"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 4 -->
+                    <div class="form-step" id="step-4">
+                        <h2><i class="bi bi-clipboard-check"></i> Review & Submit</h2>
+                        <p>Verify your information. You can go back to edit any section.</p>
+                        
+                        <div class="review-box">
+                            <div class="review-grid">
+                                <div class="review-card">
+                                    <h3><i class="bi bi-person"></i> Personal</h3>
+                                    <div class="review-details" id="review-personal-v2"></div>
+                                </div>
+                                <div class="review-card">
+                                    <h3><i class="bi bi-briefcase"></i> Position</h3>
+                                    <div class="review-details" id="review-job-v2"></div>
+                                </div>
+                                <div class="review-card">
+                                    <h3><i class="bi bi-file-earmark-text"></i> Attachments</h3>
+                                    <div class="review-details" id="review-docs-v2"></div>
+                                </div>
+                            </div>
+                            
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-outline btn-prev" data-step="4"><i class="bi bi-chevron-left"></i> Previous</button>
+                            <button type="submit" class="btn btn-primary">Submit Application <i class="bi bi-send"></i></button>
+                        </div>
+                    </div>
+
+            </div>
         </form>
     </div>
 
+    <footer class="brand-footer">
+        <div class="container">
+            <p class="brand-footer-name">ALOHA SECURITY AGENCY</p>
+            <p>108, Old highway, Guiwan, Zamboanga City, 7000</p>
+            <p>Hotline: 09352854814</p>
+            <p class="brand-footer-since">SINCE 2002</p>
+        </div>
+    </footer>
+
+
     <!-- JS Import -->
     <script type="module" src="js/main.js"></script>
+
+    
+    <script>
+        // --- REAL-TIME PROGRESS TRACKING ---
+        const formInputs = document.querySelectorAll('input, select, textarea');
+        const progressBar = document.getElementById('top-progress-bar');
+        
+        function updateProgress() {
+            // Find which step is currently active
+            const activeStepDiv = document.querySelector('.form-step.active-step');
+            if(!activeStepDiv) return;
+            
+            const currentStepNum = parseInt(activeStepDiv.id.replace('step-', ''));
+            const baseProgress = (currentStepNum - 1) * 25; // 0, 25, 50, or 75
+            
+            // Calculate progress WITHIN the current step
+            const requiredInStep = activeStepDiv.querySelectorAll('[required]');
+            let filledInStepCount = 0;
+            
+            requiredInStep.forEach(field => {
+                if (field.type === 'file') {
+                    if (field.files.length > 0) filledInStepCount++;
+                } else if (field.value && field.value.trim() !== "") {
+                    filledInStepCount++;
+                }
+            });
+            
+            const stepContribution = requiredInStep.length > 0 ? (filledInStepCount / requiredInStep.length) * 25 : 25;
+            
+            // Special Case: Step 4 is the Review step, so it should be near 100%
+            const totalProgress = currentStepNum === 4 ? 100 : baseProgress + stepContribution;
+            
+            progressBar.style.width = `${totalProgress}%`;
+        }
+
+        formInputs.forEach(input => {
+            input.addEventListener('input', updateProgress);
+            input.addEventListener('change', updateProgress);
+        });
+
+        // Trigger progress on step navigation buttons
+        document.querySelectorAll('.btn-next, .btn-prev').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Wait slightly for main.js to update the active class
+                setTimeout(updateProgress, 10);
+            });
+        });
+
+        // --- DASHBOARD REVIEW POPULATION ---
+        const nextToReviewBtn = document.querySelector('.btn-next[data-step="3"]');
+        if(nextToReviewBtn) {
+            nextToReviewBtn.addEventListener('click', () => {
+                const formData = new FormData(document.getElementById('multi-step-form'));
+                
+                // Personal Section
+                const personalDiv = document.getElementById('review-personal-v2');
+                personalDiv.innerHTML = `
+                    <div class="review-field"><label>Full Name</label><span>${formData.get('first_name')} ${formData.get('last_name')}</span></div>
+                    <div class="review-field"><label>Email</label><span>${formData.get('email')}</span></div>
+                    <div class="review-field"><label>Mobile</label><span>${formData.get('contact_num')}</span></div>
+                    <div class="review-field"><label>Birthdate</label><span>${formData.get('birthdate')}</span></div>
+                    <div class="review-field"><label>Gender</label><span>${formData.get('gender') || 'Not selected'}</span></div>
+                    <div class="review-field"><label>Address</label><span>${formData.get('address')}</span></div>
+                `;
+
+                // Job Section
+                const jobDiv = document.getElementById('review-job-v2');
+                const exp = formData.get('years_experience') || '0';
+                jobDiv.innerHTML = `
+                    <div class="review-field"><label>Position</label><span>${formData.get('position_applied')}</span></div>
+                    <div class="review-field"><label>Experience</label><span>${exp} Years</span></div>
+                    <div class="review-field"><label>Prev. Employer</label><span>${formData.get('previous_employer') || 'None'}</span></div>
+                `;
+
+                // Docs Section
+                const docsDiv = document.getElementById('review-docs-v2');
+                const resumeName = document.getElementById('resume').files[0]?.name || "Not attached";
+                const idName = document.getElementById('id_image').files[0]?.name || "Not attached";
+                docsDiv.innerHTML = `
+                    <div class="review-field"><label>Resume</label><span>${resumeName}</span></div>
+                    <div class="review-field"><label>ID Check</label><span>${idName}</span></div>
+                `;
+            });
+        }
+
+        // --- DRAG AND DROP & CLICK UPLOAD ---
+        const uploadCards = document.querySelectorAll('.upload-card');
+
+        uploadCards.forEach(card => {
+            const input = card.querySelector('input[type="file"]');
+             const label = card.querySelector('span');
+
+            // Handle Click (Replacing inline onclick for better control)
+            card.addEventListener('click', () => input.click());
+
+            // Visual feedback on drag
+            ['dragenter', 'dragover'].forEach(eventName => {
+                card.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    card.classList.add('drag-over');
+                });
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                card.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    card.classList.remove('drag-over');
+                });
+            });
+
+            // Handle drop
+            card.addEventListener('drop', (e) => {
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    // Standard way to programmatically set file input
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(files[0]);
+                    input.files = dataTransfer.files;
+                    
+                    // Trigger label update and progress
+                    label.textContent = files[0].name;
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
+                    updateProgress();
+                }
+            });
+        });
+
+        // --- FILE UPLOAD FEEDBACK (CLICK) ---
+        // This handles cases where user clicks and selects via dialog
+        document.querySelectorAll('input[type="file"]').forEach(input => {
+            input.addEventListener('change', (e) => {
+                const label = e.target.closest('.upload-card').querySelector('span');
+                label.textContent = e.target.files[0]?.name || 'Click to upload or drag & drop';
+                updateProgress();
+            });
+        });
+
+        // Initial Progress Call
+        updateProgress();
+    </script>
 </body>
 </html>
