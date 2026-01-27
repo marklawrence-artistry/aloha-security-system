@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Aloha Security</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="sidebar-brand">
+            <i class="bi bi-shield-check"></i> ALOHA <span>ADMIN</span>
+        </div>
+        <a href="admin-dashboard.html" class="nav-item active"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
+        <a href="applicants.html" class="nav-item"><i class="bi bi-people-fill"></i> Applicants</a>
+        <a href="branches.html" class="nav-item"><i class="bi bi-building-fill"></i> Branches</a>
+        <a href="deployment.html" class="nav-item"><i class="bi bi-geo-alt-fill"></i> Deployment</a>
+        <button id="logout-btn" class="nav-item logout-btn border-0 w-100 text-start cursor-pointer"><i class="bi bi-box-arrow-left"></i> Logout</button>
+    </nav>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1>Dashboard Overview</h1>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="total-apps">-</div>
+                <div class="stat-label">Total Applicants</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="pending-apps">-</div>
+                <div class="stat-label">Pending Reviews</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">0</div>
+                <div class="stat-label">Active Deployments</div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div style="padding: 20px; border-bottom: 1px solid #eee;">
+                <h4>Recent Applications</h4>
+            </div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Position</th>
+                        <th>Phone</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="applicants-body">
+                    <!-- JS will populate this -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script src="js/admin.js"></script>
+</body>
+</html>

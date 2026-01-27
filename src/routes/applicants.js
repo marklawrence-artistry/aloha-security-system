@@ -1,19 +1,19 @@
 const express = require('express');
 const router = express.Router();
-
 const applicantController = require('../controllers/applicantController');
+const authController = require('../controllers/authController');
 const upload = require('../middleware/upload');
+const { verifyToken } = require('../middleware/authMiddleware');
 
-// Handle multiple files: 'resume' and 'id_image'
-const uploadFields = upload.fields([
-    { name: 'resume', maxCount: 1 }, 
-    { name: 'id_image', maxCount: 1 }
-]);
+const uploadFields = upload.fields([{ name: 'resume', maxCount: 1 }, { name: 'id_image', maxCount: 1 }]);
 
-// POST /api/apply
+// Public Routes
 router.post('/apply', uploadFields, applicantController.apply);
-
-// GET /api/status
 router.get('/status', applicantController.checkStatus);
+router.post('/auth/login', authController.login); // Login Route
+
+// Admin Routes (Protected)
+router.get('/applicants', verifyToken, applicantController.getAllApplicants);
+router.put('/applicants/:id/status', verifyToken, applicantController.updateStatus);
 
 module.exports = router;

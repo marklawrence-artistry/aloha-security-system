@@ -1,4 +1,4 @@
-const { run, get } = require('../utils/helper');
+const { run, get, all } = require('../utils/helper');
 
 // POST /api/apply
 const apply = async (req, res) => {
@@ -71,7 +71,9 @@ const checkStatus = async (req, res) => {
             return res.status(400).json({success:false, data:"Please provide an Application ID or Email to check status."});
         }
 
-        let query = "SELECT id, first_name, last_name, status, created_at FROM applicants WHERE ";
+        // --- FIX STARTS HERE ---
+        // Changed specific columns to * so we get ALL details (address, phone, images, etc)
+        let query = "SELECT * FROM applicants WHERE ";
         let params = [];
 
         if(id) {
@@ -83,6 +85,7 @@ const checkStatus = async (req, res) => {
         }
 
         const applicant = await get(query, params);
+        // --- FIX ENDS HERE ---
 
         if(!applicant) {
             return res.status(404).json({success:false, data:"Application not found."});
@@ -95,4 +98,44 @@ const checkStatus = async (req, res) => {
     }
 }
 
-module.exports = { apply, checkStatus };
+// GET /api/applicants (Protected)
+const getAllApplicants = async (req, res) => {
+    try {
+        const { status } = req.query;
+        let query = "SELECT * FROM applicants";
+        let params = [];
+
+        if (status) {
+            query += " WHERE status = ?";
+            params.push(status);
+        }
+
+        query += " ORDER BY created_at DESC";
+
+        const rows = await all(query, params);
+        res.status(200).json({ success: true, data: rows });
+    } catch (err) {
+        res.status(500).json({ success: false, data: err.message });
+    }
+};
+
+// PUT /api/applicants/:id/status (Protected)
+const updateStatus = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body; // e.g., "Hired", "Rejected", "For Interview"
+
+        if (!id || !status) {
+            return res.status(400).json({ success: false, data: "ID and Status are required." });
+        }
+
+        await run("UPDATE applicants SET status = ? WHERE id = ?", [status, id]);
+
+        res.status(200).json({ success: true, data: `Applicant status updated to ${status}` });
+    } catch (err) {
+        res.status(500).json({ success: false, data: err.message });
+    }
+};
+
+// Update exports
+module.exports = { apply, checkStatus, getAllApplicants, updateStatus };
