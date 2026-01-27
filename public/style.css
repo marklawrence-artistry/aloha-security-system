@@ -6,6 +6,16 @@
     --gray-border: #ccc;
 }
 
+@font-face {
+    font-family: 'Helvetica Display';
+    src: url('fonts/HelveticaNowDisplay-Bold.otf') format('otf');
+}
+
+@font-face {
+    font-family: 'Helvetica Text';
+    src: url('fonts/HelveticaNowText-Regular.otf') format('otf');
+}
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -13,13 +23,14 @@
 }
 
 body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     background-color: var(--off-white);
     color: var(--primary-black);
     line-height: 1.6;
+    font-family: 'Helvetica Text';
 }
 
 h1, h2, h3, h4 {
+    font-family: 'Helvetica Display';
     font-weight: 700; /* Bold like Display font */
     letter-spacing: -0.5px;
 }
