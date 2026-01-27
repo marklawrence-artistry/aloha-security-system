@@ -1,0 +1,194 @@
+/* font */
+@font-face {
+    font-family: 'HelveticaCustom';
+    src: url('../fonts/HelveticaNowDisplay-Regular.otf') format('truetype');
+    font-weight: normal; font-style: normal;
+}
+@font-face {
+    font-family: 'HelveticaCustom';
+    src: url('../fonts/HelveticaNowDisplay-Bold.otf') format('truetype');
+    font-weight: bold; font-style: normal;
+}
+
+/* root variables */
+:root {
+    --brand-red: #e53828;
+    --brand-black: #232323;
+    --brand-white: #ffffff;
+    --text-muted: #888888;
+    --input-border: #dcdcdc;
+    --radius: 12px;
+    --ease: cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+html, body {
+    height: 100%;
+    font-family: 'HelveticaCustom', Arial, sans-serif !important;
+    background-color: var(--brand-white);
+    margin: 0;
+}
+
+.login-split-container {
+    height: 100vh;
+    width: 100vw;
+    overflow-x: hidden;
+}
+
+.panel-overflow { 
+    overflow: hidden; 
+    position: relative; 
+}
+
+.nav-logo { 
+    height: 50px; 
+}
+
+.login-welcome-panel {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: flex-end;
+    padding: 80px;
+    position: relative;
+    border-radius: 0 60px 60px 0 !important; 
+    overflow: hidden !important;      
+    border-right: 1px solid rgba(0,0,0,0.1); 
+}
+
+.ken-burns-bg {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.7)), 
+                url('../resources/stock\ photos\ 7.jpg'); 
+    background-size: cover;
+    background-position: center;
+    animation: kenBurnsEffect 20s infinite alternate linear;
+    z-index: 1;
+}
+
+.welcome-text-box {
+    color: #ffffff !important;
+    z-index: 10;
+    position: relative;
+}
+
+.login-form-wrapper { 
+    width: 100%; 
+    max-width: 440px; 
+    padding: 30px; }
+
+.custom-input {
+    height: 60px !important;
+    border: 1px solid var(--input-border) !important;
+    border-radius: var(--radius) !important;
+    transition: 0.3s var(--ease);
+    background-color: #fff !important;
+}
+
+.form-floating > label { 
+    color: var(--text-muted); 
+    padding: 1rem; 
+    transition: 0.3s var(--ease); }
+
+.form-floating > .custom-input:focus ~ label,
+.form-floating > .custom-input:not(:placeholder-shown) ~ label {
+    opacity: 1;
+    transform: scale(0.85) translateY(-1.3rem) translateX(0.15rem);
+    color: var(--brand-red) !important;
+    background-color: var(--brand-white); 
+    padding: 0 8px;
+    height: auto;
+}
+
+.custom-input:focus {
+    border-color: var(--brand-red) !important;
+    box-shadow: 0 0 0 4px rgba(229, 56, 40, 0.1) !important;
+}
+
+.btn-brand-action {
+    background-color: var(--brand-black);
+    color: white;
+    border-radius: var(--radius);
+    font-weight: 800;
+    text-transform: uppercase;
+    position: relative;
+    overflow: hidden;
+    border: none;
+    transition: 0.4s var(--ease);
+    z-index: 1;
+}
+
+.btn-brand-action span { 
+    position: relative; 
+    z-index: 2; 
+}
+
+.btn-brand-action::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -150%; width: 100%; height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.4), transparent);
+    transition: 0.6s;
+    z-index: 1;
+}
+
+.btn-brand-action:hover {
+    background-color: var(--brand-red);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(229, 56, 40, 0.3);
+}
+
+.btn-brand-action:hover::before { left: 150%; }
+
+/* Keyframes */
+@keyframes kenBurnsEffect {
+    from { transform: scale(1); }
+    to { transform: scale(1.15); }
+}
+
+@keyframes revealFromLeft {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+}
+
+@keyframes fadeInUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.reveal-left { 
+    animation: revealFromLeft 1.2s var(--ease) forwards; 
+}
+
+.animate-up-1 { 
+    opacity: 0; 
+    animation: fadeInUp 0.8s var(--ease) 0.5s forwards; }
+.animate-up-2 { 
+    opacity: 0; 
+    animation: fadeInUp 0.8s var(--ease) 0.7s forwards; }
+.animate-up-3 { 
+    opacity: 0; 
+    animation: fadeInUp 0.8s var(--ease) 0.9s forwards; }
+
+/* Respinsiveness */
+@media (max-width: 991px) {
+    .login-split-container { 
+        overflow-y: auto; 
+        height: 100vh;
+        background-color: #fff;
+    }
+    .login-form-wrapper {
+        margin-top: 80px;
+        padding: 20px;
+        max-width: 100%;
+    }
+    .mobile-center-adjust {
+        padding: 20px 0;
+    }
+    h1.display-5 { font-size: 2.5rem; }
+    .navbar.scrolled {
+        background: #fff;
+        padding: 10px 0;
+    } 
+    .nav-logo { height: 40px; }
+}
