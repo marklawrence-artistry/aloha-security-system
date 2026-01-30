@@ -1,60 +1,99 @@
+/* ---  helvetica font --- */
+@font-face {
+    font-family: 'Helvetica';
+    src: url('../fonts/HelveticaNowDisplay-Regular.otf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Helvetica-Bold';
+    src: url('../fonts/HelveticaNowDisplay-Bold.otf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+/* --- root variables --- */
 :root {
     --brand-red: #e53828;
     --brand-black: #232323;
-    --brand-white: #faf6f7;
+    --brand-white: #ffffff;
+    --brand-bg: #faf6f7;
     --transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
 body {
-    font-family: 'Inter', sans-serif;
-    background-color: var(--brand-white);
+    font-family: 'Helvetica', Arial, sans-serif !important;
+    background-color: var(--brand-bg);
     color: var(--brand-black);
     overflow-x: hidden;
 }
 
-/* --- HEADER & BURGER MENU --- */
+h1, h2, h3, h4, .fw-black, .navbar-brand {
+    font-family: 'Helvetica-Bold', sans-serif !important;
+}
+
 .navbar {
-    padding: 20px 0;
+    padding: 25px 0;
     background: transparent;
     transition: var(--transition);
+    z-index: 1100;
 }
 
-.navbar.scrolled {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    padding: 10px 0;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-}
-
-.navbar-brand {
-    font-weight: 900;
-    font-size: 1.5rem;
-    color: var(--brand-black) !important;
-}
-.navbar-brand span { color: var(--brand-red); }
-
-.nav-link {
+/* --- NAVIGATION --- */
+.navbar .nav-link {
     font-weight: 700;
     text-transform: uppercase;
     font-size: 0.85rem;
     margin: 0 15px;
-    color: var(--brand-black) !important;
+    color: var(--brand-white) !important; 
+    transition: var(--transition);
 }
 
-.nav-link:hover { color: var(--brand-white) !important; }
+.navbar .nav-link:hover { 
+    color: var(--brand-black) !important; 
+    transform: translateY(-2px);
+}
 
-.navbar-toggler { border: none; padding: 0; }
-.navbar-toggler:focus { box-shadow: none; }
+.navbar.scrolled {
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(10px);
+    padding: 12px 0;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+.navbar.scrolled .nav-link {
+    color: var(--brand-blackr) !important;
+}
+
+.navbar.scrolled .nav-link:hover {
+    color: var(--brand-red) !important;
+}
+
+.navbar-toggler {
+    border: none !important;
+    padding: 10px;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
 .toggler-icon {
     width: 30px;
     height: 3px;
     background-color: var(--brand-black);
     display: block;
-    margin: 5px 0;
-    transition: 0.3s;
+    margin: 6px 0;
+    transition: var(--transition);
+    border-radius: 3px;
 }
 
-/* --- HERO SECTION: DESKTOP SPLIT --- */
+@media (min-width: 992px) {
+    .navbar:not(.scrolled) .toggler-icon {
+        background-color: var(--brand-white);
+    }
+}
+
+/* ---  HERO SECTION --- */
 .hero-wrapper {
     position: relative;
     min-height: 100vh;
@@ -97,20 +136,12 @@ body {
     line-height: 1.7;
 }
 
-/* --- LOGO --- */
+/* --- LOGO & ANIMATION --- */
 .hero-image-container {
     position: relative;
     display: flex;
     justify-content: flex-end; 
     align-items: center;
-    padding-right: 0; 
-}
-
-.logo-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: var(--transition);
 }
 
 .hero-logo-img {
@@ -132,33 +163,20 @@ body {
     border-radius: 50px;
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 1px;
     transition: var(--transition);
-}
-
-.btn-brand:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-    background-color: var(--brand-red);
-}
-.btn-red {
-    background: var(--brand-black);
-    color: white;
-    border: none;
-}
-.btn-red:hover {
-    background: var(--brand-red);
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(229, 56, 40, 0.3);
-}
-.btn-outline-custom {
-    border: 2px solid var(--brand-black);
-    color: var(--brand-black);
 }
 
 .btn-get-quote {
     background-color: var(--brand-black);
     color: white;
+    border: none;
+}
+
+.btn-get-quote:hover {
+    background-color: var(--brand-red);
+    color: white !important;
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(229, 56, 40, 0.3);
 }
 
 .btn-check-status {
@@ -168,35 +186,47 @@ body {
 }
 .btn-check-status:hover {
     background: var(--brand-black);
-    color: white;
+    color: white !important;
 }
 
-
+/* ---  MOBILE RESPONSIVE  --- */
 @media (max-width: 991px) {
+    .navbar { padding: 15px 0; }
+    .navbar .nav-link { 
+        color: var(--brand-black) !important; 
+        margin: 10px 0;
+        text-align: center;
+    }   
+    .navbar .nav-link:hover { 
+        color: var(--brand-red) !important; }
     .hero-bg-shape { 
         width: 100%; 
-        height: 50%; 
+        height: 55%; 
         top: auto; 
         bottom: 0; 
-        clip-path: polygon(0 20%, 100% 0, 100% 100%, 0 100%); 
-    }
-    .hero-wrapper { text-align: center; padding-bottom: 100px; }
+        clip-path: polygon(0 15%, 100% 0, 100% 100%, 0 100%); 
+    }   
+    .hero-wrapper { 
+        text-align: center; 
+        padding-top: 140px; 
+        padding-bottom: 80px; }
     .hero-image-container { 
         margin-top: 50px; 
         justify-content: center; 
-        padding-right: 0;
-    }
-    .hero-logo-img { max-width: 280px; margin-right: 0; }
-    .red-dash { margin: 0 auto 30px; }
-    .hero-desc { margin: 0 auto 40px; color: var(--brand-white) }
-    
+        padding-right: 0; }
+    .hero-logo-img { 
+        max-width: 280px; 
+        margin-right: 0; }
+    .hero-desc { 
+        margin: 0 auto 40px; color: var(--brand-white); }
     .navbar-collapse {
         background: white;
         padding: 20px;
         border-radius: 20px;
         margin-top: 15px;
         box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }   
+    .navbar-toggler .toggler-icon {
+        background-color: var(--brand-black); 
     }
-    .nav-link:hover { color: var(--brand-red) !important; }
 }
-
