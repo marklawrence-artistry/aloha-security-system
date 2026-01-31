@@ -134,14 +134,36 @@ a { text-decoration: none; }
     font-weight: 700; 
 }
 
-/* --- 5. TABLES & BADGES --- */
+/* --- FIXED TABLE & TOOLBAR LAYOUT --- */
 .table-container {
     background: white;
     border-radius: 12px;
-    border: 1px solid #ddd;
+    border: 1px solid #e0e0e0;
     overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    margin-top: 30px;
 }
+
+/* New Toolbar Class for perfect alignment */
+.toolbar {
+    padding: 20px 25px; /* Proper padding */
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    background-color: #fff;
+}
+
+.toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    max-width: 600px;
+}
+
+
 
 .table {
     width: 100%;
@@ -381,4 +403,57 @@ a { text-decoration: none; }
     background-color: #fef2f2;
     border-color: #dc2626;
     color: #dc2626;
+}
+
+
+/* Force height equality for inputs and buttons */
+.search-input, .sort-select, .btn-toolbar {
+    height: 42px; /* Fixed height for alignment */
+    border-radius: 6px;
+    border: 1px solid #d0d0d0;
+    font-size: 0.9rem;
+    box-shadow: none;
+    outline: none;
+}
+
+.search-input {
+    flex: 1; /* Takes available space */
+    padding: 0 15px;
+}
+
+.sort-select {
+    padding: 0 35px 0 15px;
+    background-color: #fff;
+    cursor: pointer;
+}
+
+.btn-toolbar {
+    padding: 0 20px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Green Add Button */
+.btn-add {
+    background-color: #10b981;
+    color: white;
+}
+.btn-add:hover { background-color: #059669; }
+
+/* Table Padding Fix */
+.table th { padding: 18px 25px; background: #f8f9fa; border-bottom: 2px solid #eee; font-weight: 700; color: #555; }
+.table td { padding: 18px 25px; vertical-align: middle; border-bottom: 1px solid #f0f0f0; }
+
+/* Pagination Padding */
+.pagination-container {
+    padding: 15px 25px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #fafafa;
 }

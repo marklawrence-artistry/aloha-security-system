@@ -42,17 +42,17 @@
         </div>
 
         <div class="table-container">
-            <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
-                <div class="d-flex gap-2">
-                    <input type="text" id="search-input" class="form-control" placeholder="Search guard or branch..." style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 250px;">
-                    <select id="sort-select" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            <div class="toolbar">
+                <div class="toolbar-left">
+                    <input type="text" id="search-input" class="search-input" placeholder="Search branches...">
+                    <select id="sort-select" class="sort-select">
                         <option value="desc">Newest First</option>
                         <option value="asc">Oldest First</option>
                     </select>
                 </div>
-                <a href="deploy-form.html" class="btn-hire" style="text-decoration:none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">
+                <button class="btn-toolbar btn-add" onclick="location.href='deploy-form.html'">
                     <i class="bi bi-plus-lg"></i> Deploy Guard
-                </a>
+                </button>
             </div>
 
             <table class="table">
@@ -69,8 +69,8 @@
                 <tbody id="deploy-body"></tbody>
             </table>
 
-            <div class="p-3 d-flex justify-content-between align-items-center bg-light">
-                <span id="page-info" class="text-muted small">Page 1</span>
+            <div class="pagination-container">
+                <span id="page-info" class="text-muted small">Loading...</span>
                 <div class="d-flex gap-2">
                     <button id="prev-btn" class="btn-outline-custom" disabled>&lt;</button>
                     <button id="next-btn" class="btn-outline-custom">&gt;</button>

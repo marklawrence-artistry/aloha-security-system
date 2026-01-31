@@ -83,71 +83,79 @@
 
     <script src="js/admin.js"></script>
     <script>
-        // Inline logic for Dashboard specific chart
         document.addEventListener('DOMContentLoaded', async () => {
-            // Mock data generation for the wireframe effect
-            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-            const data = [15, 25, 20, 35, 10, 40]; // Dummy trend data
-            const maxVal = Math.max(...data);
+            const token = localStorage.getItem('admin_token');
+            if(!token) { window.location.href = 'login.html'; return; }
 
-            const chartHTML = months.map((m, i) => {
-                const height = (data[i] / maxVal) * 80; // Scale to 80% max height
+            try {
+                // 1. Fetch Real Stats & Chart Data
+                const res = await fetch('/api/dashboard-stats', { 
+                    headers: { 'Authorization': `Bearer ${token}` } 
+                });
+                const json = await res.json();
+
+                if (json.success) {
+                    const data = json.data;
+
+                    // A. Populate Overview Cards
+                    document.getElementById('dash-total').innerText = data.counts.total;
+                    document.getElementById('dash-pending').innerText = data.counts.pending; // Real DB Count
+                    document.getElementById('dash-deployed').innerText = data.counts.active_deployments;
+
+                    // B. Populate Real Chart
+                    renderChart(data.chart);
+
+                    // C. Populate Recent Applications Table
+                    const tbody = document.getElementById('recent-body');
+                    tbody.innerHTML = data.recent.map(a => `
+                        <tr>
+                            <td>#${String(a.id).padStart(4, '0')}</td>
+                            <td><strong>${a.first_name} ${a.last_name}</strong></td>
+                            <td>${a.position_applied}</td>
+                            <td>${new Date(a.created_at).toLocaleDateString()}</td>
+                            <td><span class="badge badge-${a.status.toLowerCase().replace(' ', '-')}">${a.status}</span></td>
+                        </tr>
+                    `).join('');
+                }
+
+            } catch (err) {
+                console.error("Dashboard Load Error:", err);
+            }
+        });
+
+        // Chart Renderer for Real Data
+        function renderChart(chartData) {
+            const container = document.getElementById('chart-bars');
+            
+            // If no data, show empty state
+            if (!chartData || chartData.length === 0) {
+                container.innerHTML = '<p style="width:100%; text-align:center; color:#999; margin-top:50px;">No data available</p>';
+                return;
+            }
+
+            // Find max value to normalize height
+            const counts = chartData.map(d => d.count);
+            const maxVal = Math.max(...counts) || 1; // Prevent division by zero
+
+            const html = chartData.map(d => {
+                // Convert '2026-01' to 'Jan'
+                const date = new Date(d.month + '-01'); 
+                const label = date.toLocaleString('default', { month: 'short' });
+                
+                const height = (d.count / maxVal) * 80; // Scale to 80% container height
+
                 return `
                     <div class="bar-group">
                         <div class="bar-bg">
-                            <div class="bar" style="height: ${height}%;"></div>
+                            <div class="bar" style="height: ${height}%;" title="${d.count} Applicants"></div>
                         </div>
-                        <span class="bar-label">${m}</span>
+                        <span class="bar-label">${label}</span>
                     </div>
                 `;
             }).join('');
-            
-            document.getElementById('chart-bars').innerHTML = chartHTML;
 
-            // Fetch Real Stats for Cards
-            const token = localStorage.getItem('admin_token');
-            if(!token) return;
-
-            // 1. Applicants Stats
-            const appRes = await fetch('/api/applicants?limit=5', { headers: { 'Authorization': `Bearer ${token}` } });
-            const appData = await appRes.json();
-            
-            if(appData.success) {
-                document.getElementById('dash-total').innerText = appData.data.stats.total;
-                
-                // We need Pending specifically, which isn't in stats object, so filter from list or add endpoint. 
-                // For now, let's just use the list if available, or update backend to send 'pending' count.
-                // Assuming backend update in future. For now, visual filler based on page.
-                // Or quick client-side approximation:
-                document.getElementById('dash-pending').innerText = "Wait..."; 
-                
-                // Populate Recent Table
-                document.getElementById('recent-body').innerHTML = appData.data.applicants.map(a => `
-                    <tr>
-                        <td>#${a.id}</td>
-                        <td>${a.first_name} ${a.last_name}</td>
-                        <td>${a.position_applied}</td>
-                        <td>${new Date(a.created_at).toLocaleDateString()}</td>
-                        <td><span class="badge badge-${a.status.toLowerCase().replace(' ', '-')}">${a.status}</span></td>
-                    </tr>
-                `).join('');
-            }
-
-            // 2. Deployment Stats
-            const depRes = await fetch('/api/deployments', { headers: { 'Authorization': `Bearer ${token}` } });
-            const depData = await depRes.json();
-            if(depData.success) {
-                document.getElementById('dash-deployed').innerText = depData.data.stats.total_active;
-            }
-            
-            // Re-fetch pending count specifically
-            // (In a real app, I'd create a /api/dashboard-stats endpoint. Here I'll hack it for speed)
-             const pendingRes = await fetch('/api/applicants?status=Pending', { headers: { 'Authorization': `Bearer ${token}` } });
-             const pendingData = await pendingRes.json();
-             if(pendingData.success) {
-                document.getElementById('dash-pending').innerText = pendingData.data.pagination.total_records;
-             }
-        });
+            container.innerHTML = html;
+        }
     </script>
 </body>
 </html>

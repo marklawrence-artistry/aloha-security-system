@@ -174,5 +174,48 @@ const updateStatus = async (req, res) => {
     }
 };
 
+// GET /api/dashboard-stats
+const getDashboardStats = async (req, res) => {
+    try {
+        // 1. KPI Cards Data
+        const totalReq = await get("SELECT COUNT(*) as count FROM applicants");
+        const pendingReq = await get("SELECT COUNT(*) as count FROM applicants WHERE status = 'Pending'");
+        
+        // Active deployments (Joining deployments table)
+        const deployedReq = await get("SELECT COUNT(*) as count FROM deployments WHERE status = 'Active'");
+
+        // 2. Chart Data (Last 6 Months) - SQLite Syntax
+        // Groups applicants by Month-Year
+        const chartQuery = `
+            SELECT strftime('%Y-%m', created_at) as month, COUNT(*) as count 
+            FROM applicants 
+            WHERE created_at >= date('now', '-6 months')
+            GROUP BY month 
+            ORDER BY month ASC
+        `;
+        const chartData = await all(chartQuery);
+
+        // 3. Recent Applicants (Limit 5)
+        const recent = await all("SELECT * FROM applicants ORDER BY created_at DESC LIMIT 5");
+
+        res.status(200).json({
+            success: true,
+            data: {
+                counts: {
+                    total: totalReq.count,
+                    pending: pendingReq.count,
+                    active_deployments: deployedReq.count
+                },
+                chart: chartData, // Real array of { month: '2026-01', count: 5 }
+                recent: recent
+            }
+        });
+
+    } catch (err) {
+        res.status(500).json({ success: false, data: err.message });
+    }
+};
+
+
 // Update exports
-module.exports = { apply, checkStatus, getAllApplicants, updateStatus };
+module.exports = { apply, checkStatus, getAllApplicants, updateStatus, getDashboardStats };

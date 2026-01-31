@@ -10,7 +10,8 @@ const uploadFields = upload.fields([{ name: 'resume', maxCount: 1 }, { name: 'id
 // Public Routes
 router.post('/apply', uploadFields, applicantController.apply);
 router.get('/status', applicantController.checkStatus);
-router.post('/auth/login', authController.login); // Login Route
+router.post('/auth/login', authController.login);
+router.get('/dashboard-stats', verifyToken, applicantController.getDashboardStats);
 
 // Admin Routes (Protected)
 router.get('/applicants', verifyToken, applicantController.getAllApplicants);
