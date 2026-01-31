@@ -77,4 +77,14 @@
                 </div>
             </div>
         </div>
-    </mai
+    </main>
+
+    <script src="js/deployment.js"></script>
+    <script>
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            localStorage.removeItem('admin_token');
+            window.location.href = 'login.html';
+        });
+    </script>
+</body>
+</html>
