@@ -101,19 +101,56 @@ const checkStatus = async (req, res) => {
 // GET /api/applicants (Protected)
 const getAllApplicants = async (req, res) => {
     try {
-        const { status } = req.query;
-        let query = "SELECT * FROM applicants";
-        let params = [];
+        const { page = 1, limit = 10, search = '', sort = 'desc' } = req.query;
+        const offset = (page - 1) * limit;
+        const searchTerm = `%${search}%`;
 
-        if (status) {
-            query += " WHERE status = ?";
-            params.push(status);
+        // 1. KPIs for Wireframe
+        const totalRes = await get("SELECT COUNT(*) as count FROM applicants");
+        const maleRes = await get("SELECT COUNT(*) as count FROM applicants WHERE gender = 'Male'");
+        const femaleRes = await get("SELECT COUNT(*) as count FROM applicants WHERE gender = 'Female'");
+        const monthRes = await get("SELECT COUNT(*) as count FROM applicants WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')");
+
+        // 2. Fetch Data with Search & Pagination
+        let query = `
+            SELECT * FROM applicants 
+            WHERE (first_name LIKE ? OR last_name LIKE ? OR email LIKE ? OR position_applied LIKE ?)
+        `;
+        
+        // Sorting logic (Wireframe has 'Date' and 'Alphabetical')
+        if (sort === 'alpha') {
+            query += ` ORDER BY last_name ASC`;
+        } else {
+            query += ` ORDER BY created_at ${sort === 'asc' ? 'ASC' : 'DESC'}`;
         }
+        
+        query += ` LIMIT ? OFFSET ?`;
 
-        query += " ORDER BY created_at DESC";
+        const applicants = await all(query, [searchTerm, searchTerm, searchTerm, searchTerm, limit, offset]);
 
-        const rows = await all(query, params);
-        res.status(200).json({ success: true, data: rows });
+        // 3. Get Total Search Count for Pagination
+        const countRes = await get(`
+            SELECT COUNT(*) as count FROM applicants 
+            WHERE (first_name LIKE ? OR last_name LIKE ? OR email LIKE ? OR position_applied LIKE ?)
+        `, [searchTerm, searchTerm, searchTerm, searchTerm]);
+
+        res.status(200).json({
+            success: true,
+            data: {
+                applicants,
+                pagination: {
+                    current_page: parseInt(page),
+                    total_pages: Math.ceil(countRes.count / limit),
+                    total_records: countRes.count
+                },
+                stats: {
+                    total: totalRes.count,
+                    male: maleRes.count,
+                    female: femaleRes.count,
+                    this_month: monthRes.count
+                }
+            }
+        });
     } catch (err) {
         res.status(500).json({ success: false, data: err.message });
     }

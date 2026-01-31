@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Applicants - Aloha Security</title>
-
+    <title>Applicants - Aloha Admin</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="../style.css">
@@ -24,31 +23,82 @@
 
     <main class="main-content">
         <div class="page-header">
-            <h1>Recruitment Management</h1>
-            <div class="search-box">
-                <!-- Placeholder for search -->
+            <h1>Applicants</h1>
+        </div>
+
+        <!-- KPI Grid (Wireframe: Total, Male, Female, This Month) -->
+        <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+            <div class="stat-card">
+                <div class="stat-number" id="kpi-total">-</div>
+                <div class="stat-label">Total Applicants</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="kpi-male">-</div>
+                <div class="stat-label">Male Applicants</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="kpi-female">-</div>
+                <div class="stat-label">Female Applicants</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="kpi-month">-</div>
+                <div class="stat-label">Total This Month</div>
             </div>
         </div>
 
+        <!-- Toolbar (Search & Sort) -->
         <div class="table-container">
+            <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
+                <div class="d-flex gap-2 w-100" style="max-width: 600px;">
+                    <div style="position: relative; flex: 1;">
+                        <i class="bi bi-search" style="position: absolute; left: 10px; top: 10px; color: #999;"></i>
+                        <input type="text" id="search-input" placeholder="Search..." style="width: 100%; padding: 8px 10px 8px 35px; border: 1px solid #ddd; border-radius: 6px;">
+                    </div>
+                    
+                    <select id="sort-select" style="padding: 8px; border: 1px solid #ddd; border-radius: 6px; width: 150px;">
+                        <option value="desc">Date: Newest</option>
+                        <option value="asc">Date: Oldest</option>
+                        <option value="alpha">Alphabetical</option>
+                    </select>
+                </div>
+                <!-- Wireframe shows "+ Add New" but usually applicants apply themselves. We can keep it or hide it. -->
+            </div>
+
             <table class="table">
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Name</th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Gender</th>
                         <th>Position</th>
-                        <th>Phone</th>
                         <th>Status</th>
+                        <th>Created At</th>
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody id="applicants-body">
-                    <!-- JS will populate this -->
+                    <!-- JS Populates -->
                 </tbody>
             </table>
+
+            <!-- Pagination -->
+            <div class="p-3 d-flex justify-content-between align-items-center bg-light">
+                <span id="page-info" class="text-muted small">Showing 0 of 0</span>
+                <div class="d-flex gap-2">
+                    <button id="prev-btn" class="btn-outline-custom" disabled>&lt;</button>
+                    <button id="next-btn" class="btn-outline-custom" disabled>&gt;</button>
+                </div>
+            </div>
         </div>
     </main>
 
-    <script src="js/admin.js"></script>
+    <script src="js/applicants.js"></script>
+    <script>
+        document.getElementById('logout-btn').addEventListener('click', () => {
+             localStorage.removeItem('admin_token');
+             window.location.href = 'login.html';
+        });
+    </script>
 </body>
 </html>

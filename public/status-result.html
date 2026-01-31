@@ -3,139 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Check Application Status - Aloha Security</title>
+    <title>Application Tracker - Aloha Security</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="css/style.css">
     <style>
-        body { background-color: #f8f9fa; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-        .status-card { background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); overflow: hidden; max-width: 500px; width: 100%; border: 1px solid #eee; }
-        .status-header { background: #232323; color: white; padding: 30px; text-align: center; }
-        .status-body { padding: 40px; }
-        .status-icon { font-size: 3rem; margin-bottom: 15px; display: block; }
-        .status-value { font-size: 1.5rem; font-weight: 800; text-transform: uppercase; margin: 10px 0 20px; }
+        body { background-color: #f4f6f8; font-family: 'Helvetica', sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+        .tracker-card { width: 100%; max-width: 480px; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.08); }
+        .tracker-header { background: #232323; color: white; padding: 35px 20px; text-align: center; }
+        .tracker-body { padding: 40px; }
+        .form-control { padding: 12px 15px; border-radius: 8px; border: 1px solid #dee2e6; }
+        .btn-track { background: #232323; color: white; font-weight: 700; padding: 12px; border-radius: 8px; width: 100%; border: none; transition: 0.3s; }
+        .btn-track:hover { background: #e53828; }
         
+        /* Result Styles */
+        .status-badge { font-size: 1.8rem; font-weight: 800; text-transform: uppercase; margin: 15px 0; letter-spacing: 1px; }
         .st-pending { color: #d69e2e; }
-        .st-hired { color: #047481; }
+        .st-hired { color: #047481; } 
         .st-rejected { color: #e53e3e; }
         .st-interview { color: #3182ce; }
-
-        .search-wrapper { position: relative; }
-        .search-wrapper i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #888; }
-        .search-wrapper input { padding-left: 40px; height: 50px; border-radius: 8px; }
+        
+        .icon-circle { width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 2.5rem; color: white; }
     </style>
 </head>
 <body>
 
-    <div class="status-card">
-        <div class="status-header">
-            <h3 class="fw-bold mb-0">Application Tracker</h3>
-            <p class="opacity-75 mb-0">Aloha Security Agency</p>
+    <div class="tracker-card">
+        <!-- Header is static, never removed -->
+        <div class="tracker-header">
+            <h3 class="fw-bold m-0">Application Tracker</h3>
+            <p class="m-0 opacity-75 small">Aloha Security Agency</p>
         </div>
-        
-        <div class="status-body">
+
+        <div class="tracker-body">
             
-            <!-- Search Form -->
-            <form id="check-form" class="mb-4">
-                <label class="form-label text-muted fw-bold small">ENTER YOUR REGISTERED EMAIL</label>
-                <div class="search-wrapper mb-3">
-                    <i class="bi bi-envelope"></i>
-                    <input type="email" id="email-check" class="form-control" placeholder="juan@example.com" required>
-                </div>
-                <button type="submit" class="btn btn-dark w-100 py-2 fw-bold">Track Application</button>
-            </form>
-
-            <hr class="my-4">
-
-            <!-- Result Area (Hidden by default) -->
-            <div id="result-area" class="text-center d-none">
-                <i id="res-icon" class="bi status-icon"></i>
-                <h5 class="text-muted">Hello, <span id="res-name">User</span></h5>
-                <div id="res-status" class="status-value">STATUS</div>
-                <p id="res-msg" class="text-secondary small">Message goes here.</p>
+            <!-- SEARCH VIEW -->
+            <div id="search-view">
+                <form id="check-form">
+                    <label class="small fw-bold text-muted mb-2">ENTER YOUR REGISTERED EMAIL</label>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-envelope"></i></span>
+                        <input type="email" id="email-input" class="form-control border-start-0" placeholder="juan@example.com" required>
+                    </div>
+                    <button type="submit" class="btn-track">Track Application</button>
+                </form>
             </div>
 
-            <div id="loading-area" class="text-center d-none">
+            <!-- LOADING VIEW -->
+            <div id="loading-view" class="text-center d-none">
                 <div class="spinner-border text-danger" role="status"></div>
-                <p class="mt-2 text-muted">Checking database...</p>
+                <p class="mt-3 text-muted small">Searching database...</p>
             </div>
 
-            <div class="text-center mt-4">
-                <a href="index.html" class="text-decoration-none text-muted small"><i class="bi bi-arrow-left"></i> Back to Home</a>
+            <!-- RESULT VIEW -->
+            <div id="result-view" class="text-center d-none">
+                <div id="status-icon-container" class="icon-circle">
+                    <i id="res-icon" class="bi"></i>
+                </div>
+                
+                <h5 class="text-muted">Hello, <span id="res-name" class="fw-bold text-dark">User</span></h5>
+                <div id="res-status" class="status-badge">STATUS</div>
+                
+                <p id="res-msg" class="text-secondary small px-3">Message</p>
+
+                <div class="mt-4 pt-3 border-top">
+                    <button onclick="resetView()" class="btn btn-sm btn-outline-secondary">Check Another</button>
+                    <a href="index.html" class="btn btn-sm btn-link text-decoration-none text-muted">Back to Home</a>
+                </div>
             </div>
+
         </div>
     </div>
 
     <script>
-        const form = document.getElementById('check-form');
-        const resultArea = document.getElementById('result-area');
-        const loadingArea = document.getElementById('loading-area');
+        const searchView = document.getElementById('search-view');
+        const loadingView = document.getElementById('loading-view');
+        const resultView = document.getElementById('result-view');
 
-        // Check for URL param passed from Index
-        const urlParams = new URLSearchParams(window.location.search);
-        const urlEmail = urlParams.get('email');
-        if(urlEmail) {
-            document.getElementById('email-check').value = urlEmail;
-            checkStatus(urlEmail);
+        // Check URL Params
+        const params = new URLSearchParams(window.location.search);
+        if(params.get('email')) {
+            document.getElementById('email-input').value = params.get('email');
+            fetchStatus(params.get('email'));
         }
 
-        form.addEventListener('submit', (e) => {
+        document.getElementById('check-form').addEventListener('submit', (e) => {
             e.preventDefault();
-            const email = document.getElementById('email-check').value;
-            checkStatus(email);
+            fetchStatus(document.getElementById('email-input').value);
         });
 
-        async function checkStatus(email) {
-            resultArea.classList.add('d-none');
-            loadingArea.classList.remove('d-none');
+        function resetView() {
+            resultView.classList.add('d-none');
+            searchView.classList.remove('d-none');
+            document.getElementById('email-input').value = '';
+        }
+
+        async function fetchStatus(email) {
+            searchView.classList.add('d-none');
+            loadingView.classList.remove('d-none');
 
             try {
                 const res = await fetch(`/api/status?email=${encodeURIComponent(email)}`);
                 const json = await res.json();
+                
+                loadingView.classList.add('d-none');
+                resultView.classList.remove('d-none');
 
-                loadingArea.classList.add('d-none');
-                resultArea.classList.remove('d-none');
-
-                if (json.success) {
+                if(json.success) {
                     const app = json.data;
                     document.getElementById('res-name').innerText = app.first_name;
-                    
-                    const statusEl = document.getElementById('res-status');
-                    const iconEl = document.getElementById('res-icon');
-                    const msgEl = document.getElementById('res-msg');
+                    const statusText = document.getElementById('res-status');
+                    const iconContainer = document.getElementById('status-icon-container');
+                    const icon = document.getElementById('res-icon');
+                    const msg = document.getElementById('res-msg');
 
-                    statusEl.innerText = app.status;
+                    statusText.innerText = app.status;
                     
-                    // Style logic
-                    statusEl.className = 'status-value'; // reset
+                    // Reset Classes
+                    statusText.className = 'status-badge';
+                    
                     if(app.status === 'Pending') {
-                        statusEl.classList.add('st-pending');
-                        iconEl.className = 'bi bi-hourglass-split status-icon st-pending';
-                        msgEl.innerText = "Your application is currently under review by our HR team.";
+                        statusText.classList.add('st-pending');
+                        iconContainer.style.background = '#d69e2e';
+                        icon.className = 'bi bi-hourglass-split';
+                        msg.innerText = "Your application is currently under review.";
                     } else if(app.status === 'Hired') {
-                        statusEl.classList.add('st-hired');
-                        iconEl.className = 'bi bi-check-circle-fill status-icon st-hired';
-                        msgEl.innerText = "Congratulations! You have been accepted. Please wait for deployment instructions.";
-                    } else if(app.status === 'For Interview') {
-                        statusEl.classList.add('st-interview');
-                        iconEl.className = 'bi bi-calendar-check status-icon st-interview';
-                        msgEl.innerText = "You are shortlisted! Please visit our office for the final interview.";
+                        statusText.classList.add('st-hired');
+                        iconContainer.style.background = '#047481';
+                        icon.className = 'bi bi-check-lg';
+                        msg.innerText = "Congratulations! You have been hired.";
+                    } else if(app.status === 'Rejected') {
+                        statusText.classList.add('st-rejected');
+                        iconContainer.style.background = '#e53e3e';
+                        icon.className = 'bi bi-x-lg';
+                        msg.innerText = "We regret to inform you that your application was not successful.";
                     } else {
-                        statusEl.classList.add('st-rejected');
-                        iconEl.className = 'bi bi-x-circle-fill status-icon st-rejected';
-                        msgEl.innerText = "We regret to inform you that your application was not successful.";
+                        statusText.classList.add('st-interview');
+                        iconContainer.style.background = '#3182ce';
+                        icon.className = 'bi bi-calendar-event';
+                        msg.innerText = "Please check your email for interview schedule.";
                     }
-
                 } else {
+                    // Not Found
                     document.getElementById('res-name').innerText = "Guest";
                     document.getElementById('res-status').innerText = "NOT FOUND";
-                    document.getElementById('res-status').className = "status-value text-secondary";
-                    document.getElementById('res-icon').className = "bi bi-search status-icon text-secondary";
-                    document.getElementById('res-msg').innerText = "No application found with this email address.";
+                    document.getElementById('res-status').className = "status-badge text-secondary";
+                    document.getElementById('status-icon-container').style.background = '#6c757d';
+                    document.getElementById('res-icon').className = "bi bi-search";
+                    document.getElementById('res-msg').innerText = "We could not find an application with that email.";
                 }
 
-            } catch (err) {
-                loadingArea.classList.add('d-none');
+            } catch(err) {
+                loadingView.classList.add('d-none');
+                searchView.classList.remove('d-none');
                 alert("Connection Error");
             }
         }
