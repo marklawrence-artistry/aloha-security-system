@@ -489,6 +489,8 @@ h1, h2, h3, h4, .fw-black, .navbar-brand {
     .stair-card:hover {
         transform: translateY(-10px);
     }
+    .hero-title span { color: var(--brand-white);
+    }
 }
 
 @media (max-width: 768px) {
