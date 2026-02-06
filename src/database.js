@@ -1,7 +1,8 @@
 const sqlite3 = require('sqlite3');
-const DB_SOURCE = 'aloha_database.db';
+const path = require('path');
 const bcrypt = require('bcrypt');
 
+// Use the VOLUME_PATH if it exists (Production), otherwise use local file (Dev)
 const DB_PATH = process.env.VOLUME_PATH 
     ? path.join(process.env.VOLUME_PATH, 'aloha_database.db') 
     : 'aloha_database.db';
@@ -13,6 +14,7 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
         console.error("DB Connection Error:", err.message);
     }
 });
+
 
 const initDB = () => {
     db.serialize(() => {
