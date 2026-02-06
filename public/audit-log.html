@@ -1,6 +1,3 @@
-<!-- ================================================ -->
-<!-- FILE: public/audit-log.html                      -->
-<!-- ================================================ -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,7 +10,6 @@
 </head>
 <body>
     <nav class="sidebar">
-        <!-- We will update all sidebars in the next step -->
         <div class="sidebar-brand">
             <i class="bi bi-shield-check"></i> ALOHA <span>ADMIN</span>
         </div>
@@ -32,6 +28,14 @@
         </div>
 
         <div class="table-container">
+            <!-- ADD THIS TOOLBAR SECTION -->
+            <div class="toolbar">
+                <div class="toolbar-left">
+                    <input type="text" id="search-input" class="search-input" placeholder="Search logs or admin username...">
+                </div>
+            </div>
+            <!-- END OF ADDITION -->
+
             <table class="table">
                 <thead>
                     <tr>
@@ -67,11 +71,15 @@
             const token = getToken();
             if(!token) { window.location.href = 'login.html'; return; }
 
+            // Get search value
+            const search = document.getElementById('search-input').value;
+
             const tbody = document.getElementById('logs-body');
             tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Loading logs...</td></tr>';
 
             try {
-                const res = await fetch(`/api/audit/logs?page=${currentPage}&limit=${limit}`, {
+                // Add search to the API call
+                const res = await fetch(`/api/audit/logs?page=${currentPage}&limit=${limit}&search=${encodeURIComponent(search)}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const result = await res.json();
@@ -118,6 +126,13 @@
             fetchLogs();
             document.getElementById('prev-btn').addEventListener('click', () => { if(currentPage > 1) { currentPage--; fetchLogs(); } });
             document.getElementById('next-btn').addEventListener('click', () => { currentPage++; fetchLogs(); });
+            
+            // Add event listener for the search input
+            document.getElementById('search-input').addEventListener('input', () => {
+                currentPage = 1; // Reset to page 1 for new search
+                fetchLogs();
+            });
+
             document.getElementById('logout-btn').addEventListener('click', () => {
                 localStorage.removeItem('admin_token');
                 window.location.href = 'login.html';
