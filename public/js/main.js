@@ -104,7 +104,12 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const result = await api.submitApplication(formData);
                 alert(`Application Submitted! Your ID is: ${result.applicant_id}`);
-                window.location.href = `status-result.html?email=${encodeURIComponent(formData.get('email'))}`; // Redirect to status page
+                
+                // --- ADD THIS LINE ---
+                localStorage.removeItem('aloha_application_draft'); // Clear saved data on success
+                // --- END OF ADDITION ---
+
+                window.location.href = `status-result.html?email=${encodeURIComponent(formData.get('email'))}`;
             } catch (err) {
                 console.error(err);
                 alert(`Error: ${err.message}`);

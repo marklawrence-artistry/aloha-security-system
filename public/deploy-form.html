@@ -1,3 +1,6 @@
+<!-- ================================================ -->
+<!-- FILE: public/deploy-form.html                    -->
+<!-- ================================================ -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,9 +13,31 @@
     <link rel="stylesheet" href="css/admin.css">
     <style>
         .form-card { background: white; padding: 40px; border-radius: 12px; border: 1px solid #ddd; max-width: 600px; margin: 0 auto; }
-        .form-group { margin-bottom: 20px; }
+        .form-group { margin-bottom: 20px; position: relative; /* For search results positioning */ }
         .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #333; }
-        .form-select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; background: #fff; }
+        .form-select, .form-input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; background: #fff; }
+        
+        /* New styles for searchable dropdown */
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 10;
+        }
+        .search-result-item {
+            padding: 10px 15px;
+            cursor: pointer;
+        }
+        .search-result-item:hover {
+            background-color: #f0f0f0;
+        }
     </style>
 </head>
 <body>
@@ -28,13 +53,14 @@
 
         <div class="form-card">
             <form id="deploy-form">
+                <!-- MODIFIED APPLICANT SELECTOR -->
                 <div class="form-group">
-                    <label>Select Applicant (Hired Status)</label>
-                    <select id="applicant-select" class="form-select" required>
-                        <option value="" disabled selected>Loading candidates...</option>
-                    </select>
+                    <label>Search Applicant (Hired Status)</label>
+                    <input type="text" id="applicant-search" class="form-input" placeholder="Start typing a name..." autocomplete="off">
+                    <input type="hidden" id="applicant-id" required>
+                    <div id="applicant-results" class="search-results" style="display: none;"></div>
                     <div style="margin-top:5px; font-size:0.85rem; color:#666;">
-                        Only applicants marked as "Hired" appear here.
+                        Only applicants marked as "Hired" will appear.
                     </div>
                 </div>
 
@@ -49,7 +75,7 @@
                     <button type="submit" class="btn-hire btn-full">Confirm Deployment</button>
                     <a href="deployment.html" class="btn btn-outline-custom text-center justify-content-center" style="width:100%;">Cancel</a>
                 </div>
-            </form>
+            form>
         </div>
     </main>
 

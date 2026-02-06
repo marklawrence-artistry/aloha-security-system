@@ -105,23 +105,37 @@ const checkStatus = async (req, res) => {
 // GET /api/applicants (Protected)
 const getAllApplicants = async (req, res) => {
     try {
-        const { page = 1, limit = 10, search = '', sort = 'desc' } = req.query;
+        const { page = 1, limit = 10, search = '', sort = 'desc', status } = req.query; // <-- Add 'status'
         const offset = (page - 1) * limit;
-        const searchTerm = `%${search}%`;
-
-        // 1. KPIs for Wireframe
-        const totalRes = await get("SELECT COUNT(*) as count FROM applicants");
-        const maleRes = await get("SELECT COUNT(*) as count FROM applicants WHERE gender = 'Male'");
-        const femaleRes = await get("SELECT COUNT(*) as count FROM applicants WHERE gender = 'Female'");
-        const monthRes = await get("SELECT COUNT(*) as count FROM applicants WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')");
-
-        // 2. Fetch Data with Search & Pagination
-        let query = `
-            SELECT * FROM applicants 
-            WHERE (first_name LIKE ? OR last_name LIKE ? OR email LIKE ? OR position_applied LIKE ?)
-        `;
         
-        // Sorting logic (Wireframe has 'Date' and 'Alphabetical')
+        let query = `SELECT * FROM applicants`;
+        let countQuery = `SELECT COUNT(*) as count FROM applicants`;
+        let whereClauses = [];
+        let params = [];
+        let countParams = [];
+
+        // --- DYNAMIC WHERE CLAUSE ---
+        if (search) {
+            whereClauses.push(`(first_name LIKE ? OR last_name LIKE ? OR email LIKE ? OR position_applied LIKE ?)`);
+            const searchTerm = `%${search}%`;
+            params.push(searchTerm, searchTerm, searchTerm, searchTerm);
+            countParams.push(searchTerm, searchTerm, searchTerm, searchTerm);
+        }
+
+        if (status) {
+            whereClauses.push(`status = ?`);
+            params.push(status);
+            countParams.push(status);
+        }
+
+        if (whereClauses.length > 0) {
+            const whereString = ` WHERE ` + whereClauses.join(' AND ');
+            query += whereString;
+            countQuery += whereString;
+        }
+        // --- END DYNAMIC WHERE CLAUSE ---
+
+        // Sorting logic
         if (sort === 'alpha') {
             query += ` ORDER BY last_name ASC`;
         } else {
@@ -129,14 +143,16 @@ const getAllApplicants = async (req, res) => {
         }
         
         query += ` LIMIT ? OFFSET ?`;
+        params.push(limit, offset);
 
-        const applicants = await all(query, [searchTerm, searchTerm, searchTerm, searchTerm, limit, offset]);
+        const applicants = await all(query, params);
+        const countRes = await get(countQuery, countParams);
 
-        // 3. Get Total Search Count for Pagination
-        const countRes = await get(`
-            SELECT COUNT(*) as count FROM applicants 
-            WHERE (first_name LIKE ? OR last_name LIKE ? OR email LIKE ? OR position_applied LIKE ?)
-        `, [searchTerm, searchTerm, searchTerm, searchTerm]);
+        // KPIs for Wireframe (These are general stats, should not be filtered by the search)
+        const totalRes = await get("SELECT COUNT(*) as count FROM applicants");
+        const maleRes = await get("SELECT COUNT(*) as count FROM applicants WHERE gender = 'Male'");
+        const femaleRes = await get("SELECT COUNT(*) as count FROM applicants WHERE gender = 'Female'");
+        const monthRes = await get("SELECT COUNT(*) as count FROM applicants WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')");
 
         res.status(200).json({
             success: true,

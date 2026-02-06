@@ -206,6 +206,59 @@
     </footer>
 
 
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('multi-step-form');
+            const formFields = form.querySelectorAll('input, select, textarea');
+            const DRAFT_KEY = 'aloha_application_draft';
+
+            // Function to save the form data to localStorage
+            const saveDraft = () => {
+                const formData = new FormData(form);
+                const formObject = Object.fromEntries(formData.entries());
+                // Don't save file inputs, as they can't be restored
+                delete formObject.resume;
+                delete formObject.id_image;
+                localStorage.setItem(DRAFT_KEY, JSON.stringify(formObject));
+            };
+
+            // Function to load the saved draft
+            const loadDraft = () => {
+                const draft = localStorage.getItem(DRAFT_KEY);
+                if (draft) {
+                    const data = JSON.parse(draft);
+                    let hasData = false;
+                    for (const key in data) {
+                        const field = form.querySelector(`[name="${key}"]`);
+                        if (field && data[key]) {
+                            field.value = data[key];
+                            hasData = true;
+                        }
+                    }
+                    if (hasData) {
+                        console.log('Application draft loaded.');
+                        // Trigger the floating labels to move up
+                        form.querySelectorAll('input, select, textarea').forEach(el => {
+                            if (el.value) {
+                                el.dispatchEvent(new Event('input', { bubbles: true }));
+                            }
+                        });
+                    }
+                }
+            };
+
+            // Load draft when the page loads
+            loadDraft();
+
+            // Save draft whenever any field changes
+            formFields.forEach(field => {
+                if (field.type !== 'file') {
+                    field.addEventListener('input', saveDraft);
+                }
+            });
+        });
+    </script>
+    
     <!-- JS Import -->
     <script type="module" src="js/main.js"></script>
 
