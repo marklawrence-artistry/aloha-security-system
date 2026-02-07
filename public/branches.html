@@ -15,9 +15,12 @@
             <i class="bi bi-shield-check"></i> ALOHA <span>ADMIN</span>
         </div>
         <a href="admin-dashboard.html" class="nav-item"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
+        <a href="audit-log.html" class="nav-item"><i class="bi bi-clipboard-data-fill"></i> Audit Logs</a>
         <a href="applicants.html" class="nav-item"><i class="bi bi-people-fill"></i> Applicants</a>
         <a href="branches.html" class="nav-item active"><i class="bi bi-building-fill"></i> Branches</a>
         <a href="deployment.html" class="nav-item"><i class="bi bi-geo-alt-fill"></i> Deployment</a>
+        <a href="users.html" class="nav-item"><i class="bi bi-person-gear"></i> Users</a>
+        <a href="settings.html" class="nav-item"><i class="bi bi-gear-fill"></i> Settings</a>
         <button id="logout-btn" class="nav-item logout-btn border-0 w-100 text-start cursor-pointer"><i class="bi bi-box-arrow-left"></i> Logout</button>
     </nav>
 
@@ -41,11 +44,17 @@
             <div class="toolbar">
                 <div class="toolbar-left">
                     <input type="text" id="search-input" class="search-input" placeholder="Search branches...">
-                    <select id="sort-select" class="sort-select">
-                        <option value="desc">Newest First</option>
-                        <option value="asc">Oldest First</option>
-                    </select>
                 </div>
+
+                <select id="sort-select" class="sort-select">
+                    <option value="desc">Newest First</option>
+                    <option value="asc">Oldest First</option>
+                </select>
+        
+                <!-- Delete Button -->
+                <button id="multi-delete-btn" class="btn-reject" style="display: none; margin-right: 10px;">
+                    Delete Selected
+                </button>
                 <button onclick="openModal()" class="btn-toolbar btn-add">
                     <i class="bi bi-plus-lg"></i> Add New
                 </button>
@@ -54,6 +63,7 @@
             <table class="table">
                 <thead>
                     <tr>
+                        <th style="width: 40px;"><input type="checkbox" id="check-all"></th>
                         <th>ID</th>
                         <th>Branch Name</th>
                         <th>Location</th>
@@ -99,6 +109,7 @@
         </div>
     </div>
 
+    <script src="js/admin.js"></script>
     <script src="js/branches.js"></script>
     <script>
         document.getElementById('logout-btn').addEventListener('click', () => {

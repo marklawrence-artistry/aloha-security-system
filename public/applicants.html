@@ -15,9 +15,12 @@
             <i class="bi bi-shield-check"></i> ALOHA <span>ADMIN</span>
         </div>
         <a href="admin-dashboard.html" class="nav-item"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
+        <a href="audit-log.html" class="nav-item"><i class="bi bi-clipboard-data-fill"></i> Audit Logs</a>
         <a href="applicants.html" class="nav-item active"><i class="bi bi-people-fill"></i> Applicants</a>
         <a href="branches.html" class="nav-item"><i class="bi bi-building-fill"></i> Branches</a>
         <a href="deployment.html" class="nav-item"><i class="bi bi-geo-alt-fill"></i> Deployment</a>
+        <a href="users.html" class="nav-item"><i class="bi bi-person-gear"></i> Users</a>
+        <a href="settings.html" class="nav-item"><i class="bi bi-gear-fill"></i> Settings</a>
         <button id="logout-btn" class="nav-item logout-btn border-0 w-100 text-start cursor-pointer"><i class="bi bi-box-arrow-left"></i> Logout</button>
     </nav>
 
@@ -53,16 +56,24 @@
                     <select id="sort-select" class="sort-select">
                         <option value="desc">Date: Newest</option>
                         <option value="asc">Date: Oldest</option>
-                        <option value="alpha">Alphabetical</option>
                     </select>
                 </div>
-                <!-- Only show Add button if you have a manual add page, otherwise remove button or leave empty div -->
-                <div></div> 
+                
+                <!-- BUTTON GROUP FOR DELETION -->
+                <div id="delete-actions" style="display: none; gap: 10px;">
+                    <button id="btn-delete-standard" class="btn-reject" style="padding: 8px 12px; font-size: 0.85rem;">
+                        <i class="bi bi-person-x-fill"></i> Delete Applicant
+                    </button>
+                    <button id="btn-delete-force" class="btn-reject" style="padding: 8px 12px; font-size: 0.85rem; background: #742a2a; border-color: #742a2a; color: white;">
+                        <i class="bi bi-exclamation-triangle-fill"></i> Delete w/ Deployments
+                    </button>
+                </div>
             </div>
 
             <table class="table">
                 <thead>
                     <tr>
+                        <th style="width: 40px;"><input type="checkbox" id="check-all"></th>
                         <th>ID</th>
                         <th>Full Name</th>
                         <th>Email</th>
@@ -86,6 +97,7 @@
         </div>
     </main>
 
+    <script src="js/admin.js"></script>
     <script src="js/applicants.js"></script>
     <script>
         document.getElementById('logout-btn').addEventListener('click', () => {

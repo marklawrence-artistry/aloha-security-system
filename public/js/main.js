@@ -1,9 +1,12 @@
+// ================================================
+// FILE: public/js/main.js
+// ================================================
 import * as api from './api.js';
 
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- DOM ELEMENTS ---
-    const checkStatusBtns = document.querySelectorAll('.check-status-action'); // Class for any button that checks status
+    const checkStatusBtns = document.querySelectorAll('.check-status-action');
     const appForm = document.querySelector('#multi-step-form');
     
     // --- LANDING PAGE LOGIC ---
@@ -28,14 +31,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if(appForm) {
         const nextBtns = document.querySelectorAll('.btn-next');
         const prevBtns = document.querySelectorAll('.btn-prev');
-        const steps = document.querySelectorAll('.form-step');
-        const indicators = document.querySelectorAll('.stepper .step');
         const stepLabel = document.querySelector('#current-step-label');
 
         // Next Step Logic
         nextBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const currentStepNum = parseInt(e.target.dataset.step); // e.g., 1
+                const currentStepNum = parseInt(e.target.dataset.step);
                 const nextStepNum = currentStepNum + 1;
 
                 // Validation
@@ -60,17 +61,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Switch UI
                 changeStep(currentStepNum, nextStepNum);
 
-                // If moving to Review Step (Step 4), populate data
-                if (nextStepNum === 4) {
-                    populateReviewSection();
-                }
+                // This part is now handled by the inline script in application.html
+                // The check for `nextStepNum === 4` is no longer needed here.
             });
         });
 
         // Previous Step Logic
         prevBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const currentStepNum = parseInt(e.target.dataset.step); // e.g., 2
+                const currentStepNum = parseInt(e.target.dataset.step);
                 const prevStepNum = currentStepNum - 1;
                 changeStep(currentStepNum, prevStepNum);
             });
@@ -78,28 +77,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // UI Helper
         function changeStep(from, to) {
-            // Hide current
             document.querySelector(`#step-${from}`).classList.remove('active-step');
-            document.querySelector(`#step-ind-${from}`).classList.remove('active'); // Indicator
+            document.querySelector(`#step-ind-${from}`).classList.remove('active');
             
-            // Show next
             document.querySelector(`#step-${to}`).classList.add('active-step');
-            document.querySelector(`#step-ind-${to}`).classList.add('active'); // Indicator
+            document.querySelector(`#step-ind-${to}`).classList.add('active');
 
             if(stepLabel) stepLabel.innerText = to;
         }
 
-        // Review Helper
-        function populateReviewSection() {
-            const formData = new FormData(appForm);
-            const list = document.querySelector('#review-list');
-            list.innerHTML = '';
-            
-            list.innerHTML += `<li><strong>Name:</strong> ${formData.get('first_name')} ${formData.get('last_name')}</li>`;
-            list.innerHTML += `<li><strong>Email:</strong> ${formData.get('email')}</li>`;
-            list.innerHTML += `<li><strong>Mobile:</strong> ${formData.get('contact_num')}</li>`;
-            list.innerHTML += `<li><strong>Position:</strong> ${formData.get('position_applied')}</li>`;
-        }
+        // --- REMOVED FAULTY FUNCTION ---
+        // The populateReviewSection function that caused the error has been deleted.
+        // The inline script in application.html handles this correctly.
+        // --- END OF REMOVAL ---
 
         // Form Submit
         appForm.addEventListener('submit', async (e) => {
@@ -114,7 +104,12 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const result = await api.submitApplication(formData);
                 alert(`Application Submitted! Your ID is: ${result.applicant_id}`);
-                window.location.href = 'index.html';
+                
+                // --- ADD THIS LINE ---
+                localStorage.removeItem('aloha_application_draft'); // Clear saved data on success
+                // --- END OF ADDITION ---
+
+                window.location.href = `status-result.html?email=${encodeURIComponent(formData.get('email'))}`;
             } catch (err) {
                 console.error(err);
                 alert(`Error: ${err.message}`);

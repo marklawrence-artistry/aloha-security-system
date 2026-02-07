@@ -1,31 +1,69 @@
+// ================================================
+// FILE: src/database.js
+// ================================================
 const sqlite3 = require('sqlite3');
-const DB_SOURCE = 'aloha_database.db';
+const path = require('path');
 const bcrypt = require('bcrypt');
 
-const db = new sqlite3.Database(DB_SOURCE, (err) => {
-    if(err) {
-        console.log(err.message);
-    }
-})
+const DB_PATH = process.env.VOLUME_PATH 
+    ? path.join(process.env.VOLUME_PATH, 'aloha_database.db') 
+    : 'aloha_database.db';
+
+let db = null;
+
+const connectDB = () => {
+    db = new sqlite3.Database(DB_PATH, (err) => {
+        if(err) console.error("DB Connection Error:", err.message);
+        else console.log(`Database connected at: ${DB_PATH}`);
+    });
+    return db;
+};
+
+// Helper to get the current active instance
+const getDB = () => {
+    if (!db) return connectDB();
+    return db;
+};
+
+// Helper to close connection (Promisified for await)
+const closeDB = () => {
+    return new Promise((resolve, reject) => {
+        if (db) {
+            db.close((err) => {
+                if (err) reject(err);
+                else {
+                    console.log("Database connection closed.");
+                    db = null;
+                    resolve();
+                }
+            });
+        } else {
+            resolve();
+        }
+    });
+};
 
 const initDB = () => {
-    db.serialize(() => {
-        db.run('PRAGMA foreign_keys = ON;');
-
-        // 1. Users (Admins)
-        db.run(`
+    const database = getDB();
+    database.serialize(() => {
+        database.run('PRAGMA foreign_keys = ON;');
+        
+        // --- 1. Users ---
+        database.run(`
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username TEXT NOT NULL UNIQUE,
                 email TEXT NOT NULL UNIQUE,
                 password_hash TEXT NOT NULL,
                 role TEXT DEFAULT 'Admin',
+                security_question TEXT,
+                security_answer_hash TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
 
-        // 2. Branches
-        db.run(`
+        // --- 2. Branches ---
+        database.run(`
             CREATE TABLE IF NOT EXISTS branches (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL UNIQUE,
@@ -35,8 +73,8 @@ const initDB = () => {
             );
         `);
 
-        // 3. Applicants
-        db.run(`
+        // --- 3. Applicants ---
+        database.run(`
             CREATE TABLE IF NOT EXISTS applicants (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 first_name TEXT NOT NULL,
@@ -52,12 +90,13 @@ const initDB = () => {
                 status TEXT DEFAULT 'Pending',
                 resume_path TEXT,
                 id_image_path TEXT,
+                ip_address TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
 
-        // 4. Deployments
-        db.run(`
+        // --- 4. Deployments ---
+        database.run(`
             CREATE TABLE IF NOT EXISTS deployments (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 applicant_id INTEGER,
@@ -69,8 +108,8 @@ const initDB = () => {
             );
         `);
 
-        // 5. Audit Logs
-        db.run(`
+        // --- 5. Audit Logs ---
+        database.run(`
             CREATE TABLE IF NOT EXISTS audit_logs (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER,
@@ -81,17 +120,22 @@ const initDB = () => {
             );
         `);
 
-        // Create default Admin
-        bcrypt.hash("Admin123!", 10, (err, hash) => {
-            db.run('INSERT OR IGNORE INTO users (username, email, password_hash) VALUES (?, ?, ?)', 
-            ["admin", "admin@aloha.com", hash], function(err) {
-                if(err) return;
-                console.log("Default Admin created if not exists.");
-            })
-        })
+        // Create default Admin if not exists
+        bcrypt.hash("Admin123!", 10, (err, passHash) => {
+            bcrypt.hash("aloha", 10, (err, answerHash) => {
+                database.run(`INSERT OR IGNORE INTO users 
+                    (username, email, password_hash, role, security_question, security_answer_hash) 
+                    VALUES (?, ?, ?, ?, ?, ?)`, 
+                    ["admin", "admin@aloha.com", passHash, "Admin", "What is the agency name?", answerHash]
+                );
+            });
+        });
         
         console.log('Database tables initialized.');
-    })
-}
+    });
+};
 
-module.exports = { db, initDB }
+// Initial Connection
+connectDB();
+
+module.exports = { getDB, initDB, closeDB, connectDB };

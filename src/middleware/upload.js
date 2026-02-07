@@ -1,9 +1,17 @@
+// ================================================
+// FILE: src/middleware/upload.js
+// ================================================
 const multer = require('multer');
 const path = require('path');
 
+// Use the same logic as server.js to determine the destination
+const BASE_PATH = process.env.VOLUME_PATH || path.join(__dirname, '../../public');
+const UPLOAD_PATH = path.join(BASE_PATH, 'uploads');
+
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'public/uploads/');
+        // Point multer to the correct path (volume in production, local folder in dev)
+        cb(null, UPLOAD_PATH);
     },
     filename: (req, file, cb) => {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);

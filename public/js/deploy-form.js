@@ -1,54 +1,97 @@
+// ================================================
+// FILE: public/deploy-form.js (Corrected)
+// ================================================
 const API_BASE = '/api';
+let searchTimeout;
+
+// DOM Elements
+const applicantSearchInput = document.getElementById('applicant-search');
+const applicantIdInput = document.getElementById('applicant-id');
+const applicantResultsContainer = document.getElementById('applicant-results');
+const branchSelect = document.getElementById('branch-select');
+const deployForm = document.getElementById('deploy-form');
 
 function getToken() {
     return localStorage.getItem('admin_token');
 }
 
-async function loadData() {
+async function loadBranches() {
     const token = getToken();
-
     try {
-        const [appRes, branchRes] = await Promise.all([
-            fetch(`${API_BASE}/applicants?status=Hired`, { headers: { 'Authorization': `Bearer ${token}` } }),
-            fetch(`${API_BASE}/branches?limit=100`, { headers: { 'Authorization': `Bearer ${token}` } })
-        ]);
-
-        const appData = await appRes.json();
-        const branchData = await branchRes.json();
-
-        const appSelect = document.getElementById('applicant-select');
-        const branchSelect = document.getElementById('branch-select');
-
-        const hiredApplicants = appData.data.applicants;
-
-        if (appData.success && hiredApplicants && hiredApplicants.length > 0) {
-            appSelect.innerHTML = '<option value="" disabled selected>Select a Guard</option>' + 
-                hiredApplicants.map(a => `<option value="${a.id}">${a.first_name} ${a.last_name} (${a.position_applied})</option>`).join('');
-        } else {
-            appSelect.innerHTML = '<option value="" disabled>No Hired applicants available</option>';
-        }
-
-        const branches = branchData.data.branches;
+        const res = await fetch(`${API_BASE}/branches?limit=1000`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const branchData = await res.json();
         
-        if (branchData.success && branches && branches.length > 0) {
+        if (branchData.success && branchData.data.branches.length > 0) {
             branchSelect.innerHTML = '<option value="" disabled selected>Select a Branch</option>' + 
-                branches.map(b => `<option value="${b.id}">${b.name} - ${b.location}</option>`).join('');
+                branchData.data.branches.map(b => `<option value="${b.id}">${b.name} - ${b.location}</option>`).join('');
         } else {
             branchSelect.innerHTML = '<option value="" disabled>No branches created yet</option>';
         }
-
     } catch (err) {
-        console.error("Error loading form data", err);
-        alert("Failed to load data. Please ensure you are logged in.");
+        console.error("Error loading branches", err);
     }
 }
 
-document.getElementById('deploy-form').addEventListener('submit', async (e) => {
+async function searchApplicants(searchTerm) {
+    if (searchTerm.length < 2) {
+        applicantResultsContainer.innerHTML = '';
+        applicantResultsContainer.style.display = 'none';
+        return;
+    }
+
+    const token = getToken();
+    try {
+        const res = await fetch(`${API_BASE}/applicants?status=Hired&search=${encodeURIComponent(searchTerm)}&limit=10`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const result = await res.json();
+        
+        applicantResultsContainer.innerHTML = '';
+        if (result.success && result.data.applicants.length > 0) {
+            result.data.applicants.forEach(app => {
+                const item = document.createElement('div');
+                item.className = 'search-result-item';
+                item.textContent = `${app.first_name} ${app.last_name} (${app.position_applied})`;
+                item.dataset.id = app.id;
+                item.addEventListener('click', () => {
+                    applicantSearchInput.value = item.textContent;
+                    applicantIdInput.value = item.dataset.id;
+                    applicantResultsContainer.style.display = 'none';
+                });
+                applicantResultsContainer.appendChild(item);
+            });
+            applicantResultsContainer.style.display = 'block';
+        } else {
+            applicantResultsContainer.innerHTML = '<div class="search-result-item" style="color:#888;">No hired applicants found.</div>';
+            applicantResultsContainer.style.display = 'block';
+        }
+    } catch (err) {
+        console.error('Applicant search error:', err);
+    }
+}
+
+// --- EVENT LISTENERS ---
+document.addEventListener('DOMContentLoaded', loadBranches);
+
+applicantSearchInput.addEventListener('input', () => {
+    clearTimeout(searchTimeout);
+    applicantIdInput.value = ''; // Clear ID if user is typing a new name
+    searchTimeout = setTimeout(() => {
+        searchApplicants(applicantSearchInput.value);
+    }, 300); // Debounce API calls
+});
+
+document.addEventListener('click', (e) => {
+    if (!applicantResultsContainer.contains(e.target) && e.target !== applicantSearchInput) {
+        applicantResultsContainer.style.display = 'none';
+    }
+});
+
+deployForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    
-    const applicant_id = document.getElementById('applicant-select').value;
-    const branch_id = document.getElementById('branch-select').value;
-    const btn = e.target.querySelector('button');
+    const applicant_id = applicantIdInput.value;
+    const branch_id = branchSelect.value;
+    const btn = e.target.querySelector('button[type="submit"]');
 
     if(!applicant_id || !branch_id) {
         alert("Please select both a guard and a branch.");
@@ -61,15 +104,10 @@ document.getElementById('deploy-form').addEventListener('submit', async (e) => {
     try {
         const res = await fetch(`${API_BASE}/deployments`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${getToken()}`
-            },
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` },
             body: JSON.stringify({ applicant_id, branch_id })
         });
-
         const result = await res.json();
-
         if(result.success) {
             alert('Guard Deployed Successfully!');
             window.location.href = 'deployment.html';
@@ -81,7 +119,7 @@ document.getElementById('deploy-form').addEventListener('submit', async (e) => {
     } catch (err) {
         console.error(err);
         alert('Deployment failed');
+        btn.innerText = "Confirm Deployment";
+        btn.disabled = false;
     }
 });
-
-document.addEventListener('DOMContentLoaded', loadData);

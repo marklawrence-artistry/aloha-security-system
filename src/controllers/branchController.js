@@ -1,4 +1,8 @@
+// ================================================
+// FILE: src/controllers/branchController.js
+// ================================================
 const { run, all, get } = require('../utils/helper');
+const { logAction } = require('../utils/auditLogger'); // <-- ADD THIS LINE
 
 const createBranch = async (req, res) => {
     try {
@@ -12,6 +16,11 @@ const createBranch = async (req, res) => {
             "INSERT INTO branches (name, location, required_guards) VALUES (?, ?, ?)",
             [name, location, required_guards || 1]
         );
+
+        // --- AUDIT LOG ---
+        const details = `Admin User ID #${req.user.id} created a new branch: "${name}" (ID: ${result.lastID}).`;
+        await logAction(req, 'BRANCH_CREATE', details);
+        // --- END LOG ---
 
         res.status(201).json({ 
             success: true, 
@@ -71,6 +80,11 @@ const updateBranch = async (req, res) => {
             [name, location, required_guards, id]
         );
 
+        // --- AUDIT LOG ---
+        const details = `Admin User ID #${req.user.id} updated branch ID #${id} to Name: "${name}".`;
+        await logAction(req, 'BRANCH_UPDATE', details);
+        // --- END LOG ---
+
         res.status(200).json({ success: true, data: "Branch updated successfully" });
     } catch (err) {
         res.status(500).json({ success: false, data: err.message });
@@ -80,10 +94,35 @@ const updateBranch = async (req, res) => {
 const deleteBranch = async (req, res) => {
     try {
         const { id } = req.params;
-        await run("DELETE FROM branches WHERE id = ?", [id]);
+
+        // 1. Check existence
+        const branch = await get("SELECT name FROM branches WHERE id = ?", [id]);
+        if (!branch) {
+            return res.status(404).json({ success: false, data: "Branch not found." });
+        }
+        
+        // 2. Try to Delete
+        try {
+            await run("DELETE FROM branches WHERE id = ?", [id]);
+        } catch (dbErr) {
+            // HANDLE FOREIGN KEY ERROR (If guards are deployed here)
+            if (dbErr.message.includes('FOREIGN KEY constraint failed')) {
+                return res.status(409).json({ 
+                    success: false, 
+                    data: `Cannot delete branch "${branch.name}". Guards are currently deployed here.` 
+                });
+            }
+            throw dbErr; // Throw other errors to the main catch block
+        }
+        
+        // 3. Log Action
+        const details = `Admin User ID #${req.user.id} deleted branch: "${branch.name}" (ID: ${id}).`;
+        await logAction(req, 'BRANCH_DELETE', details);
+
         res.status(200).json({ success: true, data: "Branch deleted successfully" });
     } catch (err) {
-        res.status(500).json({ success: false, data: err.message });
+        console.error(err);
+        res.status(500).json({ success: false, data: "Internal Server Error" });
     }
 };
 
