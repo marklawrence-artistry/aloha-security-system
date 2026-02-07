@@ -28,9 +28,18 @@ const initDB = () => {
                 email TEXT NOT NULL UNIQUE,
                 password_hash TEXT NOT NULL,
                 role TEXT DEFAULT 'Admin',
+                security_question TEXT,
+                security_answer_hash TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
-        `);
+        `, (err) => {
+            // MIGRATION: Attempt to add columns if table exists but columns don't
+            // This prevents errors on existing databases
+            if (!err) {
+                db.run("ALTER TABLE users ADD COLUMN security_question TEXT", () => {});
+                db.run("ALTER TABLE users ADD COLUMN security_answer_hash TEXT", () => {});
+            }
+        });
 
         // 2. Branches
         db.run(`
@@ -90,13 +99,15 @@ const initDB = () => {
         `);
 
         // Create default Admin
-        bcrypt.hash("Admin123!", 10, (err, hash) => {
-            db.run('INSERT OR IGNORE INTO users (username, email, password_hash) VALUES (?, ?, ?)', 
-            ["admin", "admin@aloha.com", hash], function(err) {
-                if(err) return;
-                console.log("Default Admin created if not exists.");
-            })
-        })
+        bcrypt.hash("Admin123!", 10, (err, passHash) => {
+            bcrypt.hash("aloha", 10, (err, answerHash) => {
+                db.run(`INSERT OR IGNORE INTO users 
+                    (username, email, password_hash, role, security_question, security_answer_hash) 
+                    VALUES (?, ?, ?, ?, ?, ?)`, 
+                    ["admin", "admin@aloha.com", passHash, "Admin", "What is the agency name?", answerHash]
+                );
+            });
+        });
         
         console.log('Database tables initialized.');
     })

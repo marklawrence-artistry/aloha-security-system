@@ -186,10 +186,36 @@ function renderChart(chartData) {
     }).join('');
 }
 
+function applyRBAC() {
+    const role = localStorage.getItem('admin_role'); // We will save this on login
+    
+    // Elements to hide for Non-Admins
+    const protectedLinks = [
+        'users.html',
+        'audit-log.html'
+    ];
+
+    if (role !== 'Admin') {
+        // 1. Remove Sidebar Links
+        const navItems = document.querySelectorAll('.nav-item');
+        navItems.forEach(item => {
+            const href = item.getAttribute('href');
+            if (href && protectedLinks.includes(href)) {
+                item.style.display = 'none';
+            }
+        });
+
+        // 2. Hide Delete Buttons on Applicant/Branch pages (Optional stricter UI)
+        const deleteActions = document.getElementById('delete-actions');
+        if(deleteActions) deleteActions.style.display = 'none !important';
+    }
+}
+
 // --- 4. INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
     // Run Auth Check everywhere (except login)
     checkAuth();
+    applyRBAC();
     
     // Logout Handler
     const logoutBtn = document.getElementById('logout-btn');
@@ -213,6 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (json.success) {
                     localStorage.setItem('admin_token', json.data.token);
+                    localStorage.setItem('admin_role', json.data.user.role); // SAVE ROLE HERE
                     window.location.href = 'admin-dashboard.html';
                 } else {
                     alert('Login failed');

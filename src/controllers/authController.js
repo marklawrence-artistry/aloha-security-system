@@ -1,30 +1,22 @@
+// ================================================
+// FILE: src/controllers/authController.js
+// ================================================
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { get } = require('../utils/helper');
+const { get, run } = require('../utils/helper');
 const { JWT_SECRET } = require('../middleware/authMiddleware');
+const { logAction } = require('../utils/auditLogger');
 
+// Login (Updated to include role in response)
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
-
-        if (!email || !password) {
-            return res.status(400).json({ success: false, data: "Email and Password are required." });
-        }
-
-        // Check DB for admin
         const user = await get("SELECT * FROM users WHERE email = ?", [email]);
 
-        if (!user) {
+        if (!user || !(await bcrypt.compare(password, user.password_hash))) {
             return res.status(401).json({ success: false, data: "Invalid credentials." });
         }
 
-        // Check Password
-        const isMatch = await bcrypt.compare(password, user.password_hash);
-        if (!isMatch) {
-            return res.status(401).json({ success: false, data: "Invalid credentials." });
-        }
-
-        // Generate Token
         const token = jwt.sign(
             { id: user.id, username: user.username, role: user.role },
             JWT_SECRET,
@@ -35,13 +27,81 @@ const login = async (req, res) => {
             success: true,
             data: {
                 token: token,
-                user: { id: user.id, username: user.username }
+                user: { id: user.id, username: user.username, role: user.role } // Return Role
             }
         });
-
     } catch (err) {
         res.status(500).json({ success: false, data: err.message });
     }
 };
 
-module.exports = { login };
+// 1. Forgot Password - Step 1: Get Question
+const getSecurityQuestion = async (req, res) => {
+    try {
+        const { email } = req.body;
+        const user = await get("SELECT security_question FROM users WHERE email = ?", [email]);
+
+        if (!user) return res.status(404).json({ success: false, data: "Email not found." });
+        if (!user.security_question) return res.status(400).json({ success: false, data: "No security question set for this account." });
+
+        res.status(200).json({ success: true, data: { question: user.security_question } });
+    } catch (err) {
+        res.status(500).json({ success: false, data: err.message });
+    }
+};
+
+// 2. Forgot Password - Step 2: Verify & Reset
+const resetPassword = async (req, res) => {
+    try {
+        const { email, answer, newPassword } = req.body;
+        const user = await get("SELECT id, security_answer_hash FROM users WHERE email = ?", [email]);
+
+        if (!user) return res.status(404).json({ success: false, data: "User not found." });
+
+        const isMatch = await bcrypt.compare(answer.toLowerCase().trim(), user.security_answer_hash);
+        if (!isMatch) return res.status(401).json({ success: false, data: "Incorrect security answer." });
+
+        const newHash = await bcrypt.hash(newPassword, 10);
+        await run("UPDATE users SET password_hash = ? WHERE id = ?", [newHash, user.id]);
+
+        await logAction({ user: { id: user.id }, ip: req.ip }, 'PASS_RESET', `Password reset via security question for ${email}`);
+
+        res.status(200).json({ success: true, data: "Password reset successfully." });
+    } catch (err) {
+        res.status(500).json({ success: false, data: err.message });
+    }
+};
+
+// 3. Settings - Update Profile (Password / Security Q)
+const updateProfile = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { currentPassword, newPassword, newQuestion, newAnswer } = req.body;
+
+        const user = await get("SELECT password_hash FROM users WHERE id = ?", [userId]);
+
+        // Verify current password first
+        const isMatch = await bcrypt.compare(currentPassword, user.password_hash);
+        if (!isMatch) return res.status(401).json({ success: false, data: "Current password incorrect." });
+
+        // Update Password if provided
+        if (newPassword) {
+            const hash = await bcrypt.hash(newPassword, 10);
+            await run("UPDATE users SET password_hash = ? WHERE id = ?", [hash, userId]);
+        }
+
+        // Update Security Question if provided
+        if (newQuestion && newAnswer) {
+            const ansHash = await bcrypt.hash(newAnswer.toLowerCase().trim(), 10);
+            await run("UPDATE users SET security_question = ?, security_answer_hash = ? WHERE id = ?", 
+                [newQuestion, ansHash, userId]);
+        }
+
+        await logAction(req, 'PROFILE_UPDATE', `User ID ${userId} updated their security settings.`);
+        res.status(200).json({ success: true, data: "Settings updated successfully." });
+    } catch (err) {
+        res.status(500).json({ success: false, data: err.message });
+    }
+};
+
+module.exports = { login, getSecurityQuestion, resetPassword, updateProfile };

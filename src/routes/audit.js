@@ -4,9 +4,9 @@
 const express = require('express');
 const router = express.Router();
 const auditController = require('../controllers/auditController');
-const { verifyToken } = require('../middleware/authMiddleware');
+const { verifyToken, verifyAdmin } = require('../middleware/authMiddleware'); // Import verifyAdmin
 
-// GET /api/audit/logs - Protected route to fetch all logs
-router.get('/logs', verifyToken, auditController.getLogs);
+// Only Admins can see logs
+router.get('/logs', verifyToken, verifyAdmin, auditController.getLogs);
 
 module.exports = router;

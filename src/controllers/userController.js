@@ -19,10 +19,10 @@ const getUsers = async (req, res) => {
 // POST /api/users
 const createUser = async (req, res) => {
     try {
-        const { username, email, password, role } = req.body;
+        const { username, email, password, role, security_question, security_answer } = req.body;
 
         if (!username || !email || !password) {
-            return res.status(400).json({ success: false, data: "Username, Email, and Password are required." });
+            return res.status(400).json({ success: false, data: "Missing required fields." });
         }
 
         // Check for duplicate
@@ -32,11 +32,17 @@ const createUser = async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
+        
+        let answerHash = null;
+        if (security_answer) {
+            answerHash = await bcrypt.hash(security_answer.toLowerCase().trim(), 10);
+        }
+
         const userRole = role || 'Admin';
 
-        const result = await run(
-            "INSERT INTO users (username, email, password_hash, role) VALUES (?, ?, ?, ?)",
-            [username, email, hashedPassword, userRole]
+        await run(
+            "INSERT INTO users (username, email, password_hash, role, security_question, security_answer_hash) VALUES (?, ?, ?, ?, ?, ?)",
+            [username, email, hashedPassword, userRole, security_question, answerHash]
         );
 
         await logAction(req, 'USER_CREATE', `Created user: ${username} (${email})`);

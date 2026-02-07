@@ -20,4 +20,8 @@ router.put('/applicants/:id/status', verifyToken, applicantController.updateStat
 // Add this route
 router.delete('/applicants/:id', verifyToken, applicantController.deleteApplicant);
 
+router.post('/auth/forgot-password-init', authController.getSecurityQuestion);
+router.post('/auth/reset-password', authController.resetPassword);
+router.put('/auth/update-profile', verifyToken, authController.updateProfile); // For Settings Page
+
 module.exports = router;
