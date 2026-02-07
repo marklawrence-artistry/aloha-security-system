@@ -31,6 +31,7 @@ const branchRoutes = require('./routes/branches.js');
 const deploymentRoutes = require('./routes/deployments.js');
 const auditRoutes = require('./routes/audit.js');
 const userRoutes = require('./routes/users.js');
+const systemRoutes = require('./routes/system.js');
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../public')));
@@ -42,6 +43,7 @@ app.use('/api/branches', branchRoutes);
 app.use('/api/deployments', deploymentRoutes);
 app.use('/api/audit', auditRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/system', systemRoutes);
 
 initDB();
 startCronJob();
