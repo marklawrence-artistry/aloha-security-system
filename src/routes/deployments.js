@@ -7,5 +7,6 @@ router.post('/', verifyToken, deploymentController.deployGuard);
 router.get('/', verifyToken, deploymentController.getDeployments);
 router.put('/:id', verifyToken, deploymentController.updateDeploymentStatus);
 router.delete('/:id', verifyToken, deploymentController.deleteDeployment);
+router.get('/report/pdf', verifyToken, deploymentController.generateReport);
 
 module.exports = router;

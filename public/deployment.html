@@ -74,10 +74,16 @@
                         <option value="asc">Oldest First</option>
                     </select>
                 </div>
-                <!-- Link acts as button -->
-                <a href="deploy-form.html" class="btn-toolbar btn-add">
-                    <i class="bi bi-plus-lg"></i> Deploy Guard
-                </a>
+                <div class="toolbar-right" style="display:flex; gap:10px;">
+                    <!-- NEW PDF BUTTON -->
+                    <button onclick="downloadPdfReport()" class="btn-outline-custom" style="height:42px;">
+                        <i class="bi bi-printer-fill"></i> Print Report
+                    </button>
+                    
+                    <a href="deploy-form.html" class="btn-toolbar btn-add">
+                        <i class="bi bi-plus-lg"></i> Deploy Guard
+                    </a>
+                </div>
             </div>
 
             <!-- Tactical Grid replaces Table -->
@@ -394,6 +400,45 @@
             fetchDeployments();
         } else {
             document.addEventListener('DOMContentLoaded', fetchDeployments);
+        }
+
+        async function downloadPdfReport() {
+            const btn = document.querySelector('button[onclick="downloadPdfReport()"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Generating...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/deployments/report/pdf', {
+                    method: 'GET',
+                    headers: { 
+                        'Authorization': `Bearer ${getToken()}` 
+                    }
+                });
+
+                if (res.ok) {
+                    // Convert response to blob
+                    const blob = await res.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    
+                    // Create invisible link and click it
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `aloha_deployment_report_${new Date().toISOString().slice(0,10)}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                } else {
+                    alert("Failed to generate report. Only admins can perform this action.");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Error downloading report.");
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
         }
     </script>
 </body>

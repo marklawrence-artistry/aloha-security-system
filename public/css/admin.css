@@ -2029,3 +2029,48 @@ a { text-decoration: none; }
     backdrop-filter: blur(2px);
 }
 .sidebar-overlay.active { opacity: 1; visibility: visible; }
+
+
+/* --- PRINT STYLES --- */
+@media print {
+    @page { margin: 1cm; size: landscape; }
+    
+    body { background: white; font-size: 12pt; -webkit-print-color-adjust: exact; }
+    
+    /* Hide Non-Printables */
+    .sidebar, .page-header, .stats-grid, .filter-container, 
+    .toolbar, .pagination-container, .btn-action, button, 
+    .navbar, #logout-btn { 
+        display: none !important; 
+    }
+
+    /* Reset Layout */
+    .main-content { margin: 0; padding: 0; width: 100%; }
+    .table-container { border: none; box-shadow: none; }
+
+    /* Format Grid for Print */
+    .facility-grid {
+        display: block; /* Stack items */
+    }
+
+    .deployment-card {
+        page-break-inside: avoid;
+        border: 1px solid #000;
+        box-shadow: none;
+        margin-bottom: 15px;
+        break-inside: avoid;
+    }
+
+    /* Force Colors for Status */
+    .card-tag { border: 1px solid #000 !important; color: #000 !important; background: #eee !important; }
+    
+    /* Header for Print */
+    .main-content::before {
+        content: "Aloha Security - Deployment Report";
+        display: block;
+        font-size: 20pt;
+        font-weight: bold;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+}
