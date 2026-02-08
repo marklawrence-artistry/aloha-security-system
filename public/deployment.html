@@ -46,34 +46,38 @@
 
         <!-- NEW TABLE CONTAINER STRUCTURE -->
         <div class="table-container">
+            <!-- Filter Chips -->
+            <div class="filter-container" id="filter-chips">
+                <div class="filter-chip active" data-filter="all">
+                    <i class="bi bi-grid-fill"></i> All <span class="count-badge" id="count-all">0</span>
+                </div>
+                <div class="filter-chip" data-filter="Active">
+                    <i class="bi bi-person-check-fill"></i> On Duty <span class="count-badge" id="count-Active">0</span>
+                </div>
+                <div class="filter-chip" data-filter="Ended">
+                    <i class="bi bi-person-x-fill"></i> Ended <span class="count-badge" id="count-Ended">0</span>
+                </div>
+            </div>
+
             <!-- Toolbar: Search Left, Button Right -->
             <div class="toolbar">
                 <div class="toolbar-left">
                     <input type="text" id="search-input" class="search-input" placeholder="Search guard or branch...">
-                    <select id="sort-select" class="sort-select">
+                    <select id="sort-select" class="sort-select" title="Sort deployment records">
                         <option value="desc">Newest First</option>
                         <option value="asc">Oldest First</option>
                     </select>
                 </div>
                 <!-- Link acts as button -->
-                <a href="deploy-form.html" class="btn-toolbar btn-add" style="text-decoration: none;">
+                <a href="deploy-form.html" class="btn-toolbar btn-add">
                     <i class="bi bi-plus-lg"></i> Deploy Guard
                 </a>
             </div>
 
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Guard Name</th>
-                        <th>Branch Assigned</th>
-                        <th>Date Deployed</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="deploy-body"></tbody>
-            </table>
+            <!-- Tactical Grid replaces Table -->
+            <div class="facility-grid" id="deploy-grid">
+                <!-- Cards will be rendered here -->
+            </div>
 
             <!-- Pagination Footer -->
             <div class="pagination-container">
@@ -86,13 +90,305 @@
         </div>
     </main>
 
-    <script src="js/deployment.js"></script>
+    <!-- Core System Scripts -->
     <script src="js/admin.js"></script>
     <script>
+        const API_BASE = '/api/deployments';
+        let currentFilter = 'all';
+        let allDeployments = [];
+        let filteredDeployments = [];
+        let allBranchesMap = {}; 
+        const itemsPerPage = 6; 
+
+        // Override fetchDeployments to handle full data for client-side filtering
+        window.fetchDeployments = async function() {
+            const searchField = document.getElementById('search-input');
+            const sortField = document.getElementById('sort-select');
+            const search = searchField ? searchField.value : '';
+            const sort = sortField ? sortField.value : 'desc';
+            
+            try {
+                // 1. Fetch Branches for Mini-Map data (Isolated to not block deployments)
+                try {
+                    const branchRes = await fetch('/api/branches?limit=1000', {
+                        headers: { 'Authorization': `Bearer ${getToken()}` }
+                    });
+                    const branchData = await branchRes.json();
+                    if (branchData.success && branchData.data.branches) {
+                        allBranchesMap = branchData.data.branches.reduce((acc, b) => {
+                            acc[b.id] = { ...b, active_count: 0 };
+                            return acc;
+                        }, {});
+                    }
+                } catch (bErr) { console.error("Branch fetch failed:", bErr); }
+
+                // 2. Fetch Deployments
+                const res = await fetch(`${API_BASE}?page=1&limit=1000&search=${search}&sort=${sort}`, {
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+                const result = await res.json();
+                
+                if (result.success) {
+                    allDeployments = result.data.deployments || [];
+                    
+                    // Calculate active guard counts per branch manually for tooltips
+                    Object.values(allBranchesMap).forEach(b => b.active_count = 0);
+                    allDeployments.forEach(d => {
+                        if (d.status === 'Active') {
+                            const branch = Object.values(allBranchesMap).find(b => b.name === d.branch_name);
+                            if (branch) branch.active_count++;
+                        }
+                    });
+
+                    applyFilters();
+                    updateStats(result.data.stats || { total_deployments: 0, total_active: 0, this_month: 0 });
+                }
+            } catch (err) {
+                console.error("Main fetch failed:", err);
+                const grid = document.getElementById('deploy-grid');
+                if(grid) grid.innerHTML = '<div class="text-center p-5 text-danger">Failed to load data. Please refresh.</div>';
+            }
+        };
+
+        function applyFilters() {
+            const searchField = document.getElementById('search-input');
+            const searchQuery = searchField ? searchField.value.toLowerCase() : '';
+
+            filteredDeployments = allDeployments.filter(d => {
+                const statusMatch = currentFilter === 'all' || d.status === currentFilter;
+                return statusMatch;
+            });
+
+            // Update Pagination display
+            const totalPages = Math.ceil(filteredDeployments.length / itemsPerPage);
+            if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
+            
+            updatePagination({
+                current_page: currentPage,
+                total_pages: totalPages || 1
+            });
+
+            // Render current page
+            const start = (currentPage - 1) * itemsPerPage;
+            const paginatedItems = filteredDeployments.slice(start, start + itemsPerPage);
+            renderTable(paginatedItems);
+        }
+
+        // Override updatePagination to handle client-side paging
+        window.updatePagination = function(pagination) {
+            document.getElementById('page-info').innerText = `Page ${pagination.current_page} of ${pagination.total_pages}`;
+            document.getElementById('prev-btn').disabled = pagination.current_page === 1;
+            document.getElementById('next-btn').disabled = pagination.current_page >= pagination.total_pages;
+        };
+
+        // Enhanced Text Highlighting
+        function highlightText(text, query) {
+            if (!query) return text;
+            const regex = new RegExp(`(${query})`, 'gi');
+            return text.replace(regex, '<span class="highlight">$1</span>');
+        }
+
+        // Override renderTable for Tactical Grid
+        window.renderTable = function(data) {
+            const grid = document.getElementById('deploy-grid');
+            const searchField = document.getElementById('search-input');
+            const searchQuery = searchField ? searchField.value : '';
+
+            if (data.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1/-1; padding: 40px; text-align: center; color: #64748b; background: white; border-radius: 16px; border: 1px dashed #cbd5e1;">
+                        <i class="bi bi-inbox" style="font-size: 2rem; display: block; margin-bottom: 12px;"></i>
+                        No deployments found matching your criteria.
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = data.map(d => {
+                const depDate = new Date(d.date_deployed);
+                const now = new Date();
+                const diffMs = now - depDate;
+                const hrs = Math.floor(diffMs / (1000 * 60 * 60));
+                const days = Math.floor(hrs / 24);
+                
+                let durationText = "";
+                let progress = 0;
+                
+                if (d.status === 'Active') {
+                    if (days >= 1) {
+                        durationText = `${days} day${days > 1 ? 's' : ''} on duty`;
+                        progress = Math.min(100, (days / 30) * 100);
+                    } else {
+                        durationText = `${hrs} hour${hrs !== 1 ? 's' : ''} on duty`;
+                        progress = Math.min(100, (hrs / 24) * 100);
+                    }
+                } else {
+                    durationText = "Service Ended";
+                    progress = 100;
+                }
+
+                const isNew = d.status === 'Active' && diffMs < (24 * 60 * 60 * 1000);
+
+                return `
+                <div class="deployment-card ${isNew ? 'new-entry' : ''}">
+                    <div class="tag-container">
+                        <div class="card-tag ${d.status === 'Active' ? 'secured' : 'warning'}" style="position:static;">
+                            <i class="bi ${d.status === 'Active' ? 'bi-person-check-fill' : 'bi-person-x-fill'}"></i>
+                            ${d.status}
+                            <div class="tag-tooltip">
+                                ${d.status === 'Active' 
+                                    ? 'Guard is currently guarding the facility. Deployment is active and ongoing.' 
+                                    : 'Guard service for this specific assignment has concluded.'}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="guard-profile">
+                        <div class="guard-avatar-placeholder">
+                            <i class="bi bi-person-fill"></i>
+                        </div>
+                        <div class="guard-info">
+                            <h3>${highlightText(d.first_name + ' ' + d.last_name, searchQuery)}</h3>
+                            <div class="branch-link-wrapper">
+                                <p style="margin:0; cursor: help;"><i class="bi bi-building"></i> ${highlightText(d.branch_name, searchQuery)}</p>
+                                ${(() => {
+                                    if (!allBranchesMap || Object.keys(allBranchesMap).length === 0) return '';
+                                    const branchMatchName = (bName, dName) => {
+                                        const b = bName.trim().toLowerCase();
+                                        const d = dName.trim().toLowerCase();
+                                        // Fuzzy matching: check if d is a substring of b, or b is a substring of d
+                                        return b.includes(d) || d.includes(b);
+                                    };
+                                    const branch = Object.values(allBranchesMap).find(b => 
+                                        branchMatchName(b.name, d.branch_name)
+                                    );
+                                    if (!branch) return '';
+                                    return `
+                                    <div class="mini-map-tooltip">
+                                        <div class="mini-map-header">
+                                            <div class="mini-map-title">
+                                                <i class="bi bi-geo-alt-fill"></i> Facility Intel
+                                            </div>
+                                        </div>
+                                        <div class="mini-map-body">
+                                            <p><i class="bi bi-map"></i> ${branch.location}</p>
+                                            <div class="mini-map-stats">
+                                                <div class="mini-stat">
+                                                    <span class="mini-stat-val">${branch.active_count || 0}</span>
+                                                    <span class="mini-stat-lbl">Active</span>
+                                                </div>
+                                                <div class="mini-stat">
+                                                    <span class="mini-stat-val">${branch.required_guards}</span>
+                                                    <span class="mini-stat-lbl">Limit</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    `;
+                                })()}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="deployment-timeline">
+                        <div class="timeline-header">
+                            <span>Service Duration</span>
+                            <span>${durationText}</span>
+                        </div>
+                        <div class="timeline-track">
+                            <div class="timeline-fill ${d.status !== 'Active' ? 'ended' : ''}" style="width: ${progress}%"></div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer-actions">
+                        <span class="deployment-id">EXP #${d.id}</span>
+                        ${d.status === 'Active' 
+                            ? `<button onclick="endDeployment(${d.id})" class="btn-outline-custom" style="padding: 6px 14px; color:#ef4444; border-color:#fee2e2; background:#fef2f2; font-size:0.75rem; border-radius:8px;">End Duty</button>` 
+                            : '<span class="text-muted small">Status Logged</span>'}
+                    </div>
+                </div>
+                `;
+            }).join('');
+        };
+
+        // Override updateStats for counts
+        window.updateStats = function(stats) {
+            document.getElementById('stat-total').innerText = stats.total_deployments;
+            document.getElementById('stat-active').innerText = stats.total_active;
+            document.getElementById('stat-month').innerText = stats.this_month;
+            
+            document.getElementById('count-all').innerText = stats.total_deployments;
+            document.getElementById('count-Active').innerText = stats.total_active;
+            document.getElementById('count-Ended').innerText = stats.total_deployments - stats.total_active;
+        };
+
+        // Filter Chips Listener
+        document.getElementById('filter-chips').addEventListener('click', (e) => {
+            const chip = e.target.closest('.filter-chip');
+            if (!chip) return;
+
+            document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            currentFilter = chip.getAttribute('data-filter');
+            currentPage = 1;
+            applyFilters();
+        });
+
+        // Pagination Listeners (re-bind since we handle them locally now)
+        document.getElementById('prev-btn').addEventListener('click', (e) => {
+            e.stopImmediatePropagation();
+            if(currentPage > 1) {
+                currentPage--;
+                applyFilters();
+            }
+        });
+        document.getElementById('next-btn').addEventListener('click', (e) => {
+            e.stopImmediatePropagation();
+            const totalPages = Math.ceil(filteredDeployments.length / itemsPerPage);
+            if(currentPage < totalPages) {
+                currentPage++;
+                applyFilters();
+            }
+        });
+
         document.getElementById('logout-btn').addEventListener('click', () => {
             localStorage.removeItem('admin_token');
             window.location.href = 'login.html';
         });
+
+        async function endDeployment(id) {
+            if(!confirm("Are you sure you want to end this guard's deployment?")) return;
+
+            try {
+                const res = await fetch(`${API_BASE}/${id}`, {
+                    method: 'PUT',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getToken()}` 
+                    },
+                    body: JSON.stringify({ status: 'Ended' })
+                });
+                const result = await res.json();
+                if(result.success) {
+                    if (typeof showToast === 'function') {
+                        showToast('Duty Ended', 'Guard record has been updated.');
+                    }
+                    fetchDeployments();
+                }
+            } catch(err) {
+                console.error(err);
+            }
+        }
+
+        // Explicit Initializations
+        if (typeof currentPage === 'undefined') window.currentPage = 1;
+        
+        // Ensure initial fetch runs reliably
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            fetchDeployments();
+        } else {
+            document.addEventListener('DOMContentLoaded', fetchDeployments);
+        }
     </script>
 </body>
 </html>

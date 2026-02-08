@@ -10,25 +10,66 @@
     <link rel="stylesheet" href="css/style.css"> 
     <link rel="stylesheet" href="css/admin.css">
 </head>
-<body>
-    <nav class="sidebar">
-        <!-- Copy sidebar from dashboard -->
-         <div class="sidebar-brand"><i class="bi bi-shield-check"></i> ALOHA <span>ADMIN</span></div>
-         <a href="applicants.html" class="nav-item active"><i class="bi bi-arrow-left"></i> Back to List</a>
-    </nav>
-
+<body class="focus-layout">
     <main class="main-content">
-        <!-- 1. Top Header Bar -->
-        <div class="details-header">
-            <div class="applicant-title">
-                <h1 id="app-name">Loading...</h1>
-                <p id="app-position">...</p>
+        <div class="focus-container">
+        <!-- 1. Profile Hero Section -->
+        <div class="profile-hero">
+            <div class="hero-content">
+                <div class="hero-avatar">
+                    <div class="avatar-ring"></div>
+                    <i class="bi bi-person-fill"></i>
+                </div>
+                <div class="hero-details">
+                    <h1 id="app-name">Loading...</h1>
+                    <div class="hero-badges">
+                        <span id="app-position" class="hero-pos-badge">...</span>
+                        <div class="hero-contact-quick">
+                            <span><i class="bi bi-envelope"></i> <small id="display-email">...</small></span>
+                            <span><i class="bi bi-telephone"></i> <small id="display-phone">...</small></span>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="header-actions">
+            <div class="hero-actions-group">
                 <span id="app-status" class="badge">...</span>
-                <a href="applicants.html" class="btn btn-sm btn-outline-custom ms-3">
-                    <i class="bi bi-arrow-left"></i> Back
+                <a href="applicants.html" class="btn-hero-back">
+                    <i class="bi bi-arrow-left"></i> Back to List
                 </a>
+            </div>
+        </div>
+
+        <!-- 2. Hiring Progress Stepper -->
+        <div class="stepper-wrapper">
+            <div class="stepper-container">
+                <div class="stepper-line">
+                    <div class="stepper-line-progress" id="stepper-progress"></div>
+                </div>
+                
+                <div class="step-node" id="step-0">
+                    <div class="step-icon"><i class="bi bi-file-earmark-text"></i></div>
+                    <span class="step-label">Applied</span>
+                </div>
+                
+                <div class="step-node" id="step-1">
+                    <div class="step-icon"><i class="bi bi-search"></i></div>
+                    <span class="step-label">Screening</span>
+                </div>
+                
+                <div class="step-node" id="step-2">
+                    <div class="step-icon"><i class="bi bi-chat-dots"></i></div>
+                    <span class="step-label">Interview</span>
+                </div>
+                
+                <div class="step-node" id="step-3">
+                    <div class="step-icon"><i class="bi bi-shield-lock"></i></div>
+                    <span class="step-label">Vetting</span>
+                </div>
+                
+                <div class="step-node" id="step-4">
+                    <div class="step-icon"><i class="bi bi-check-all"></i></div>
+                    <span class="step-label">Decision</span>
+                </div>
             </div>
         </div>
 
@@ -65,37 +106,214 @@
                     <div class="card-header">
                         <h3>Action Required</h3>
                     </div>
-                    <div class="action-buttons-grid">
-                        <button id="btn-hire" class="btn btn-full btn-hire py-2">Hire Applicant</button>
-                        <button id="btn-interview" class="btn btn-full btn-interview py-2">Set Interview</button>
-                        <button id="btn-reject" class="btn btn-full btn-reject py-2">Reject</button>
+                    <div class="decision-grid">
+                        <div class="decision-card hire-card" id="btn-hire">
+                            <div class="card-icon"><i class="bi bi-person-check-fill"></i></div>
+                            <div class="card-content">
+                                <h4>Hire Applicant</h4>
+                                <p>Approve applicant for deployment.</p>
+                            </div>
+                            <div class="shimmer"></div>
+                        </div>
+
+                        <div class="decision-card interview-card" id="btn-interview">
+                            <div class="card-icon"><i class="bi bi-calendar-event-fill"></i></div>
+                            <div class="card-content">
+                                <h4>Set Interview</h4>
+                                <p>Schedule a face-to-face meeting.</p>
+                            </div>
+                        </div>
+
+                        <div class="decision-card reject-card" id="btn-reject">
+                            <div class="card-icon"><i class="bi bi-person-x-fill"></i></div>
+                            <div class="card-content">
+                                <h4>Reject</h4>
+                                <p>Discontinue the application process.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Documents Card -->
                 <div class="info-card">
                     <div class="card-header">
-                        <h3>Attachments</h3>
+                        <h3><i class="bi bi-file-earmark-text"></i> Attachments</h3>
                     </div>
                     
-                    <div class="mb-4">
-                        <label class="info-label">Resume</label>
-                        <a id="resume-link" href="#" target="_blank" class="d-block mt-1 text-decoration-none fw-bold text-primary">
-                            <i class="bi bi-file-earmark-pdf"></i> Download PDF
-                        </a>
-                    </div>
+                    <div class="document-grid">
+                        <!-- Resume Card -->
+                        <div class="doc-item">
+                            <div class="doc-icon"><i class="bi bi-file-earmark-pdf-fill"></i></div>
+                            <div class="doc-info">
+                                <span class="doc-name">Resume_CV.pdf</span>
+                                <span class="doc-meta">PDF • 1.2 MB</span>
+                            </div>
+                            <div class="doc-actions">
+                                <button class="btn-quickview" onclick="openQuickView('resume-link', 'pdf')" title="Quick View Resume" aria-label="Quick View Resume">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <a id="resume-link" href="#" target="_blank" class="btn-download" title="Download Resume" aria-label="Download Resume">
+                                    <i class="bi bi-download"></i>
+                                </a>
+                            </div>
+                            
+                        </div>
 
-                    <div>
-                        <label class="info-label">Valid ID</label>
-                        <div class="doc-preview-container">
-                            <img id="id-img" src="" class="doc-preview-img" alt="ID Preview">
+                        <!-- ID Card -->
+                        <div class="doc-item">
+                            <div class="doc-preview">
+                                <img id="id-img" src="" alt="ID Preview">
+                                <div class="preview-overlay" onclick="openQuickView('id-img', 'image')">
+                                    <i class="bi bi-zoom-in"></i>
+                                </div>
+                            </div>
+                            <div class="doc-info">
+                                <span class="doc-name">Government_ID.jpg</span>
+                                <span class="doc-meta">Image • 2.4 MB</span>
+                            </div>
+                            <div class="doc-actions">
+                                <a href="#" id="id-download" class="btn-download" title="Download ID" aria-label="Download ID"><i class="bi bi-download"></i></a>
+                            </div>
+                            
                         </div>
                     </div>
                 </div>
 
             </div>
         </div>
+    </div>
     </main>
+
+    <!-- Quick View Modal -->
+    <div id="quickview-modal" class="qv-modal">
+        <div class="qv-overlay" onclick="closeQuickView()"></div>
+        <div class="qv-content">
+            <div class="qv-header">
+                <h4 id="qv-title">Document Preview</h4>
+                <button class="qv-close" onclick="closeQuickView()" title="Close Preview" aria-label="Close Preview"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div class="qv-body" id="qv-body">
+                <!-- Content injected by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Inline Logic for Modal (Since js/ files are restricted) -->
+    <script>
+        function openQuickView(elementId, type) {
+            const modal = document.getElementById('quickview-modal');
+            const body = document.getElementById('qv-body');
+            const title = document.getElementById('qv-title');
+            const element = document.getElementById(elementId);
+            
+            if (!element) return;
+
+            body.innerHTML = '';
+            modal.classList.add('active');
+            
+            if (type === 'image') {
+                title.innerText = 'Image Preview';
+                const img = document.createElement('img');
+                img.src = element.src;
+                img.style.maxWidth = '100%';
+                img.style.borderRadius = '8px';
+                body.appendChild(img);
+            } else if (type === 'pdf') {
+                title.innerText = 'PDF Preview';
+                const iframe = document.createElement('iframe');
+                iframe.src = element.href;
+                iframe.style.width = '100%';
+                iframe.style.height = '70vh';
+                iframe.style.border = 'none';
+                iframe.style.borderRadius = '8px';
+                body.appendChild(iframe);
+            }
+        }
+
+        function closeQuickView() {
+            document.getElementById('quickview-modal').classList.remove('active');
+        }
+
+        // Bridge to sync data to the new UI components
+        const syncData = () => {
+            const emailSpan = document.querySelector('#personal-info .info-group:nth-child(1) .info-value');
+            const phoneSpan = document.querySelector('#personal-info .info-group:nth-child(2) .info-value');
+            const statusBadge = document.getElementById('app-status');
+            
+            if (emailSpan && emailSpan.innerText !== '...') {
+                document.getElementById('display-email').innerText = emailSpan.innerText;
+            }
+            if (phoneSpan && phoneSpan.innerText !== '...') {
+                document.getElementById('display-phone').innerText = phoneSpan.innerText;
+            }
+            if (statusBadge && statusBadge.innerText !== '...') {
+                updateStepper(statusBadge.innerText);
+            }
+        };
+
+        const observer = new MutationObserver(syncData);
+
+        // Observe both info area and status badge for changes
+        const infoArea = document.getElementById('personal-info');
+        const statusBadge = document.getElementById('app-status');
+        
+        if (infoArea) observer.observe(infoArea, { childList: true, characterData: true, subtree: true });
+        if (statusBadge) observer.observe(statusBadge, { childList: true, characterData: true, subtree: true });
+
+        // Fallback: Check every 500ms for 3 seconds to ensure sync
+        let checks = 0;
+        const interval = setInterval(() => {
+            syncData();
+            if (++checks > 6) clearInterval(interval);
+        }, 500);
+
+        function updateStepper(status) {
+            if (!status || status === '...') return;
+            const s = status.trim().toUpperCase();
+            console.log("Updating stepper with status:", s);
+            
+            let activeStep = 0;
+            if (s === 'PENDING') activeStep = 1;
+            else if (s === 'FOR INTERVIEW' || s === 'INTERVIEW') activeStep = 2;
+            else if (s === 'HIRED' || s === 'REJECTED' || s === 'DECISION') activeStep = 4;
+            else if (s === 'VETTING' || s === 'SCREENING') activeStep = 3; 
+
+            const originalIcons = [
+                'bi-file-earmark-text',
+                'bi-search',
+                'bi-chat-dots',
+                'bi-shield-lock',
+                'bi-check-all'
+            ];
+
+            // Update Nodes
+            for (let i = 0; i <= 4; i++) {
+                const node = document.getElementById(`step-${i}`);
+                if (!node) continue;
+                
+                node.classList.remove('active', 'completed');
+                const iconContainer = node.querySelector('.step-icon');
+                
+                if (i < activeStep) {
+                    node.classList.add('completed');
+                    iconContainer.innerHTML = `<i class="bi bi-check-lg"></i>`;
+                } else if (i === activeStep) {
+                    node.classList.add('active');
+                    iconContainer.innerHTML = `<i class="bi ${originalIcons[i]}"></i>`;
+                } else {
+                    iconContainer.innerHTML = `<i class="bi ${originalIcons[i]}"></i>`;
+                }
+            }
+
+            // Update Progress Line
+            const progress = (activeStep / 4) * 100;
+            const progressLine = document.getElementById('stepper-progress');
+            if (progressLine) progressLine.style.width = `${progress}%`;
+        }
+
+        const target = document.getElementById('personal-info');
+        if (target) observer.observe(target, { childList: true });
+    </script>
 
     <script src="js/admin.js"></script>
     <script src="js/applicant-details.js"></script>
