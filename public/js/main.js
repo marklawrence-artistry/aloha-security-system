@@ -29,92 +29,70 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- APPLICATION FORM LOGIC ---
     if(appForm) {
-        const nextBtns = document.querySelectorAll('.btn-next');
-        const prevBtns = document.querySelectorAll('.btn-prev');
-        const stepLabel = document.querySelector('#current-step-label');
+        const preSubmitBtn = document.getElementById('btn-pre-submit');
+        const modal = document.getElementById('privacy-modal');
+        const finalSubmitBtn = document.getElementById('btn-final-submit');
+        const closeModalBtn = document.getElementById('btn-modal-close');
 
-        // Next Step Logic
-        nextBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const currentStepNum = parseInt(e.target.dataset.step);
-                const nextStepNum = currentStepNum + 1;
+        // 1. Initial "Proceed" Click
+        preSubmitBtn.addEventListener('click', () => {
+            // Check Consent Checkboxes
+            const consentTruth = document.getElementById('consent_truth').checked;
+            const consentBg = document.getElementById('consent_bg_check').checked;
+            const consentDrug = document.getElementById('consent_drug_test').checked;
 
-                // Validation
-                const currentDiv = document.querySelector(`#step-${currentStepNum}`);
-                const inputs = currentDiv.querySelectorAll('input[required], select[required], textarea[required]');
-                let valid = true;
-
-                inputs.forEach(input => {
-                    if (!input.value) {
-                        valid = false;
-                        input.style.borderColor = 'red';
-                    } else {
-                        input.style.borderColor = '#ccc';
-                    }
+            if(!consentTruth || !consentBg || !consentDrug) {
+                alert("Please acknowledge all consent declarations (checkboxes) to proceed.");
+                // Highlight the missing ones visually
+                document.querySelectorAll('.consent-section input[type="checkbox"]:not(:checked)').forEach(el => {
+                    el.style.outline = "2px solid red";
+                    setTimeout(() => el.style.outline = "none", 2000);
                 });
+                return;
+            }
 
-                if (!valid) {
-                    alert("Please fill in all required fields.");
-                    return;
-                }
-
-                // Switch UI
-                changeStep(currentStepNum, nextStepNum);
-
-                // This part is now handled by the inline script in application.html
-                // The check for `nextStepNum === 4` is no longer needed here.
-            });
+            // Show Modal
+            modal.classList.add('active');
         });
 
-        // Previous Step Logic
-        prevBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const currentStepNum = parseInt(e.target.dataset.step);
-                const prevStepNum = currentStepNum - 1;
-                changeStep(currentStepNum, prevStepNum);
-            });
+        // 2. "Review Again" Click (Close Modal)
+        closeModalBtn.addEventListener('click', () => {
+            modal.classList.remove('active');
         });
 
-        // UI Helper
-        function changeStep(from, to) {
-            document.querySelector(`#step-${from}`).classList.remove('active-step');
-            document.querySelector(`#step-ind-${from}`).classList.remove('active');
-            
-            document.querySelector(`#step-${to}`).classList.add('active-step');
-            document.querySelector(`#step-ind-${to}`).classList.add('active');
+        // 3. Close on background click
+        modal.addEventListener('click', (e) => {
+            if(e.target === modal) modal.classList.remove('active');
+        });
 
-            if(stepLabel) stepLabel.innerText = to;
-        }
-
-        // --- REMOVED FAULTY FUNCTION ---
-        // The populateReviewSection function that caused the error has been deleted.
-        // The inline script in application.html handles this correctly.
-        // --- END OF REMOVAL ---
-
-        // Form Submit
-        appForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const submitBtn = appForm.querySelector('button[type="submit"]');
-            
-            submitBtn.innerText = "Submitting...";
-            submitBtn.disabled = true;
+        // 4. FINAL "Accept & Submit" Click
+        finalSubmitBtn.addEventListener('click', async () => {
+            // UI State: Loading
+            finalSubmitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
+            finalSubmitBtn.disabled = true;
+            closeModalBtn.disabled = true;
 
             const formData = new FormData(appForm);
 
             try {
+                // Submit to API
                 const result = await api.submitApplication(formData);
-                alert(`Application Submitted! Your ID is: ${result.applicant_id}`);
                 
-                // --- ADD THIS LINE ---
-                localStorage.removeItem('aloha_application_draft'); // Clear saved data on success
-                // --- END OF ADDITION ---
-
+                // Success State
+                modal.classList.remove('active'); // Hide modal
+                localStorage.removeItem('aloha_application_draft'); // Clear draft
+                alert(`Application Submitted! Your ID is: ${result.applicant_id}`);
                 window.location.href = `status-result.html?email=${encodeURIComponent(formData.get('email'))}`;
+
             } catch (err) {
                 console.error(err);
                 alert(`Error: ${err.message}`);
-                submitBtn.innerText = "Submit Application";
-                submitBtn.disabled = false;
+                
+                // Reset Button State on Error
+                finalSubmitBtn.innerHTML = 'Accept & Submit Application';
+                finalSubmitBtn.disabled = false;
+                closeModalBtn.disabled = false;
+                modal.classList.remove('active'); // Optional: hide modal on error to let them fix stuff
             }
         });
     }

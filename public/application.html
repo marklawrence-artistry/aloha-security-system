@@ -265,9 +265,35 @@
                                     </div>
                                 </div>
 
+                                <div class="consent-section bg-light p-4 rounded-3 border mb-4">
+                                    <h6 class="fw-bold mb-3"><i class="bi bi-pen-fill text-danger me-2"></i> Declarations & Consent</h6>
+                                    
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="consent_truth" required>
+                                        <label class="form-check-label small" for="consent_truth">
+                                            I declare that all information provided is true and correct.
+                                        </label>
+                                    </div>
+
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="consent_bg_check" required>
+                                        <label class="form-check-label small" for="consent_bg_check">
+                                            I consent to a thorough <strong>Background Check</strong> conducted by Aloha Security Agency.
+                                        </label>
+                                    </div>
+
+                                    <div class="form-check mb-0">
+                                        <input class="form-check-input" type="checkbox" id="consent_drug_test" required>
+                                        <label class="form-check-label small" for="consent_drug_test">
+                                            I agree to undergo mandatory <strong>Drug Testing</strong> as part of the hiring process.
+                                        </label>
+                                    </div>
+                                </div>
+
                                 <div class="form-actions d-flex justify-content-between mt-5">
                                     <button type="button" class="btn btn-outline-dark btn-prev" data-step="4"><i class="bi bi-arrow-left"></i> Previous</button>
-                                    <button type="submit" class="btn btn-brand">Submit Application <i class="bi bi-send"></i></button>
+                                    <!-- CHANGED type="submit" to type="button" and added ID -->
+                                    <button type="button" id="btn-pre-submit" class="btn btn-brand">Proceed to Submit <i class="bi bi-arrow-right"></i></button>
                                 </div>
                             </div>
 
@@ -279,6 +305,35 @@
             </div>
         </div>
     </main>
+
+    <div id="privacy-modal" class="modal-backdrop-custom">
+        <div class="modal-card-custom">
+            <div class="text-center mb-3">
+                <div class="icon-circle-red mx-auto mb-3">
+                    <i class="bi bi-shield-lock-fill"></i>
+                </div>
+                <h3 class="fw-black">Data Privacy Consent</h3>
+            </div>
+            
+            <div class="modal-body-text mb-4 text-center text-muted">
+                <p class="small">
+                    By clicking "Accept & Submit", you authorize <strong>Aloha Security Agency</strong> to process your personal data in accordance with the <strong>Data Privacy Act of 2012</strong>. 
+                </p>
+                <p class="small mb-0">
+                    Your data will be used solely for recruitment, background verification, and deployment purposes. We strictly protect your information from unauthorized access.
+                </p>
+            </div>
+
+            <div class="d-grid gap-2">
+                <button type="button" id="btn-final-submit" class="btn btn-danger btn-lg fw-bold rounded-pill">
+                    Accept & Submit Application
+                </button>
+                <button type="button" id="btn-modal-close" class="btn btn-light btn-sm text-muted rounded-pill">
+                    Review Again
+                </button>
+            </div>
+        </div>
+    </div>
 
     <footer class="footer-section text-white position-relative overflow-hidden">
         <div class="container pt-5 pb-4">
